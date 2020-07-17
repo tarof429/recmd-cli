@@ -2,6 +2,7 @@ package recmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -91,6 +92,8 @@ func TestWriteSameCommands(t *testing.T) {
 
 func TestNewCommand(t *testing.T) {
 
+	os.Remove(historyFile)
+
 	cmd := NewCommand("df /usr", "Find disk usage")
 
 	if cmd.CmdString != "df /usr" {
@@ -106,6 +109,8 @@ func TestNewCommand(t *testing.T) {
 
 func TestMultipleNewCommand(t *testing.T) {
 
+	os.Remove(historyFile)
+
 	cmd := NewCommand("df /usr fdfdfsaasf fsfadf", "Find disk usage")
 	cmd2 := NewCommand("df /usr fdfdfsaasf fsfadf", "Find disk usage")
 
@@ -117,4 +122,73 @@ func TestMultipleNewCommand(t *testing.T) {
 
 		t.Error("The hashes for the two commands were not the same")
 	}
+}
+
+func TestRunMockCommand(t *testing.T) {
+
+	os.Remove(historyFile)
+
+	cmd := NewCommand("ls", "List files")
+
+	sc := ScheduleCommand(cmd, RunMockCommand)
+
+	// if sc.ExitStatus != 0 {
+	// 	t.Error("The exit status of the command was not 0")
+	// }
+	fmt.Println(sc.Stdout)
+	fmt.Println(sc.Stderr)
+	fmt.Println(sc.ExitStatus)
+
+}
+
+func TestRunCommand(t *testing.T) {
+
+	os.Remove(historyFile)
+
+	cmd := NewCommand("ls /", "List files")
+
+	sc := ScheduleCommand(cmd, RunCommand)
+
+	if sc.ExitStatus != 0 {
+		t.Error("The exit status of the command was not 0")
+	}
+	fmt.Print("Output: " + sc.Stdout)
+	fmt.Print("Error: " + sc.Stderr)
+	fmt.Println(sc.ExitStatus)
+
+}
+
+func TestRunCommandInvalid(t *testing.T) {
+
+	os.Remove(historyFile)
+
+	cmd := NewCommand("lslsls", "List files")
+
+	sc := ScheduleCommand(cmd, RunCommand)
+
+	if sc.ExitStatus == 0 {
+		t.Error("The exit status of the command was 0")
+	}
+	fmt.Printf("Output: %s\n", sc.Stdout)
+	fmt.Printf("Error: %s\n", sc.Stderr)
+	fmt.Println(sc.ExitStatus)
+
+}
+
+func TestRunCommandMultiple(t *testing.T) {
+
+	os.Remove(historyFile)
+
+	cmd := NewCommand("cd /; ls; cd /home; ls", "List files")
+
+	sc := ScheduleCommand(cmd, RunCommand)
+
+	if sc.ExitStatus != 0 {
+		t.Error("The exit status of the command was not 0")
+	}
+
+	fmt.Printf("Output: %s\n", sc.Stdout)
+	fmt.Printf("Error: %s\n", sc.Stderr)
+	fmt.Println(sc.ExitStatus)
+
 }

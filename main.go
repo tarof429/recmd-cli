@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
+	"time"
 )
 
 // Command represents a command and optionally a comment to document what the command does
@@ -13,6 +16,16 @@ type Command struct {
 	CmdHash   string `json:"commandHash"`
 	CmdString string `json:"commandString"`
 	Comment   string `json:"comment"`
+}
+
+// ScheduledCommand represents a command that is scheduled to run
+type ScheduledCommand struct {
+	Command
+	Stdout     string    `json:"stdout"`
+	Stderr     string    `json:"stderr"`
+	ExitStatus int       `json:"exitStatus"`
+	StartTime  time.Time `json:"startTime"`
+	EndTime    time.Time `json:"endTime"`
 }
 
 // // Config represents global configuration
@@ -174,4 +187,77 @@ func NewCommand(cmdString string, cmdComment string) Command {
 	cmd := Command{formattedHash, cmdString, cmdComment}
 
 	return cmd
+}
+
+// ScheduleCommand creates a ScheduledCommand from a Command
+func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) ScheduledCommand {
+	var sc ScheduledCommand
+
+	sc.CmdHash = cmd.CmdHash
+	sc.CmdString = cmd.CmdString
+	sc.Comment = cmd.Comment
+	sc.StartTime = time.Now()
+
+	// Create a channel to hold exit status
+	c := make(chan int)
+
+	// Run the command in a goroutine
+	go f(&sc, c)
+
+	// Receive the exit status of the command
+	status := <-c
+
+	fmt.Fprintf(os.Stdout, "Command status: %d\n", status)
+
+	return sc
+}
+
+// RunMockCommand runs a mock command
+func RunMockCommand(sc *ScheduledCommand, c chan int) {
+	time.Sleep(1 * time.Second)
+	sc.ExitStatus = 99
+	sc.Stdout = "Mock stdout message"
+	sc.Stderr = "Mock stderr message"
+	c <- sc.ExitStatus
+}
+
+// RunCommand runs a command
+func RunCommand(sc *ScheduledCommand, c chan int) {
+
+	tempFile, err := ioutil.TempFile(os.TempDir(), "recmd-")
+
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Command status: %d\n", err)
+
+	}
+
+	defer os.Remove(tempFile.Name())
+
+	log.Println("Created " + tempFile.Name())
+
+	_, err = tempFile.WriteString("#!/bin/sh\n\n" + sc.CmdString)
+
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Errror while writing file: : %s\n", err)
+	}
+
+	out, err := exec.Command("sh", tempFile.Name()).Output()
+
+	if err == nil {
+		sc.ExitStatus = 0
+	} else {
+		sc.ExitStatus = -1
+
+		if err.Error() != "" {
+			sc.Stderr = err.Error()
+		}
+	}
+
+	if out == nil {
+		sc.Stdout = ""
+	} else {
+		sc.Stdout = string(out)
+	}
+
+	c <- sc.ExitStatus
 }
