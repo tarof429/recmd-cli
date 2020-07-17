@@ -128,6 +128,48 @@ func SelectCmd(dir string, field string, value string) Command {
 	return Command{}
 }
 
+// DeleteCmd deletes a command
+func DeleteCmd(cmds []Command, field string, value string) []Command {
+
+	foundIndex := -1
+
+	for index, cmd := range cmds {
+		switch field {
+		case "commandString":
+			if strings.Index(cmd.CmdString, value) == 0 {
+				foundIndex = index
+				break
+			}
+		case "commandHash":
+			if strings.Index(cmd.CmdHash, value) == 0 {
+				foundIndex = index
+				break
+			}
+		}
+	}
+
+	if foundIndex == -1 {
+		fmt.Fprintf(os.Stderr, "Unable to find command\n")
+	}
+
+	// We may want to do more investigation to know why this works...
+	cmds = append(cmds[:foundIndex], cmds[foundIndex+1:]...)
+
+	return cmds
+}
+
+// OverwriteCmdHistoryFile overwrites the history file with []Command passed in as a parameter
+func OverwriteCmdHistoryFile(dir string, cmds []Command) bool {
+
+	mode := int(0644)
+
+	updatedData, _ := json.MarshalIndent(cmds, "", "\t")
+
+	error := ioutil.WriteFile(dir+"/"+historyFile, updatedData, os.FileMode(mode))
+
+	return error == nil
+}
+
 // WriteCmdHistoryFile writes a command to the history file
 func WriteCmdHistoryFile(dir string, cmd Command) bool {
 
@@ -148,7 +190,7 @@ func WriteCmdHistoryFile(dir string, cmd Command) bool {
 
 		updatedData, _ := json.MarshalIndent(cmds, "", "\t")
 
-		error := ioutil.WriteFile(historyFile, updatedData, os.FileMode(mode))
+		error := ioutil.WriteFile(dir+"/"+historyFile, updatedData, os.FileMode(mode))
 
 		return error == nil
 	}

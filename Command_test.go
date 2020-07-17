@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestReadCmdHistoryFile(t *testing.T) {
@@ -282,6 +283,92 @@ func TestRunByCommandHash(t *testing.T) {
 
 	if ret.CmdHash != "" {
 		t.Error("Accidentally did not find an empty command")
+	}
+
+	t.Cleanup(func() {
+		os.Remove(historyFile)
+	})
+
+}
+
+func TestDeleteCommand(t *testing.T) {
+	cmd := Command{"abc", "cp", "comment a"}
+	cmd2 := Command{"def", "mv", "comment b"}
+	cmd3 := Command{"ghk", "sleep", "comment c"}
+
+	cmds := []Command{cmd, cmd2, cmd3}
+
+	// Minitest 1: Test whether we can remove a command by its hash
+	ret := DeleteCmd(cmds, "commandHash", "abc")
+
+	data, _ := json.MarshalIndent(ret, "", "\t")
+	fmt.Println(string(data))
+
+	for _, cmd := range ret {
+		if cmd.CmdHash == "abc" {
+			t.Error("Command was not deleted as expected")
+		}
+	}
+
+	// Minitest 2: Test whether we can remove a command by its name
+	cmds = append(ret, cmd)
+
+	ret = DeleteCmd(cmds, "commandString", "mv")
+
+	data, _ = json.MarshalIndent(ret, "", "\t")
+	fmt.Println(string(data))
+
+	for _, cmd := range ret {
+		if cmd.CmdHash == "def" {
+			t.Error("Command was not deleted as expected")
+		}
+	}
+
+	t.Cleanup(func() {
+		os.Remove(historyFile)
+	})
+}
+
+func TestOverwriteCmdHistoryFile(t *testing.T) {
+
+	cmd := NewCommand("cp", "comment a")
+	cmd2 := NewCommand("mv", "comment b")
+	cmd3 := NewCommand("sleep", "comment c")
+
+	if WriteCmdHistoryFile(".", cmd) == false {
+		t.Error("Unable to write " + cmd.CmdString)
+	}
+
+	time.Sleep(1 * time.Second)
+	if WriteCmdHistoryFile(".", cmd2) == false {
+		t.Error("Unable to write " + cmd2.CmdString)
+	}
+
+	if WriteCmdHistoryFile(".", cmd3) == false {
+		t.Error("Unable to write " + cmd3.CmdString)
+	}
+
+	cmds := ReadCmdHistoryFile(".")
+
+	ret := DeleteCmd(cmds, "commandString", "sleep")
+
+	// This change will remove the sleep command from the history file
+	result := OverwriteCmdHistoryFile(".", ret)
+
+	if result != true {
+		t.Error("Unable to overwrite history file")
+	}
+
+	cmds = ReadCmdHistoryFile(".")
+
+	updatedData, _ := json.MarshalIndent(cmds, "", "\t")
+
+	fmt.Println(string(updatedData))
+
+	for _, cmd := range ret {
+		if cmd.CmdString == "sleep" {
+			t.Error("Command was not deleted as expected")
+		}
 	}
 
 	t.Cleanup(func() {
