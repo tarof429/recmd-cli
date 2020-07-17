@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -88,11 +88,11 @@ const historyFile = "cmd_history.json"
 // }
 
 // ReadCmdHistoryFile reads historyFile and generates a list of Command structs
-func ReadCmdHistoryFile() []Command {
+func ReadCmdHistoryFile(dir string) []Command {
 
 	var cmds []Command
 
-	data, err := ioutil.ReadFile(historyFile)
+	data, err := ioutil.ReadFile(dir + "/" + historyFile)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "An error occurred whiel reading historyfile: %v\n", err)
@@ -106,11 +106,33 @@ func ReadCmdHistoryFile() []Command {
 	return cmds
 }
 
+// SelectCmd returns a command
+func SelectCmd(dir string, field string, value string) Command {
+
+	cmds := ReadCmdHistoryFile(dir)
+
+	for _, cmd := range cmds {
+		switch field {
+		case "commandString":
+			if strings.Index(cmd.CmdString, value) == 0 {
+				return cmd
+			}
+		case "commandHash":
+			if strings.Index(cmd.CmdHash, value) == 0 {
+				return cmd
+			}
+		}
+	}
+
+	// Return an empty command if it could not be found
+	return Command{}
+}
+
 // WriteCmdHistoryFile writes a command to the history file
-func WriteCmdHistoryFile(cmd Command) bool {
+func WriteCmdHistoryFile(dir string, cmd Command) bool {
 
 	// Check if the file does not exist. If not, then create it and add our first command to it.
-	f, err := os.Open(historyFile)
+	f, err := os.Open(dir + "/" + historyFile)
 
 	// Immediately close the file since we plan to write to it
 	f.Close()
@@ -207,6 +229,9 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	// Receive the exit status of the command
 	status := <-c
 
+	// Set end time after we receive from the channel
+	sc.EndTime = time.Now()
+
 	fmt.Fprintf(os.Stdout, "Command status: %d\n", status)
 
 	return sc
@@ -233,7 +258,7 @@ func RunCommand(sc *ScheduledCommand, c chan int) {
 
 	defer os.Remove(tempFile.Name())
 
-	log.Println("Created " + tempFile.Name())
+	fmt.Fprintf(os.Stdout, "Created "+tempFile.Name()+"\n")
 
 	_, err = tempFile.WriteString("#!/bin/sh\n\n" + sc.CmdString)
 
