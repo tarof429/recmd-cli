@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,9 +14,11 @@ import (
 
 // Command represents a command and optionally a comment to document what the command does
 type Command struct {
-	CmdHash   string `json:"commandHash"`
-	CmdString string `json:"commandString"`
-	Comment   string `json:"comment"`
+	CmdHash          string    `json:"commandHash"`
+	CmdString        string    `json:"commandString"`
+	Comment          string    `json:"comment"`
+	Creationtime     time.Time `json:"creationTime"`
+	Modificationtime time.Time `json:"lastExecutionTime"`
 }
 
 // ScheduledCommand represents a command that is scheduled to run
@@ -249,7 +252,7 @@ func NewCommand(cmdString string, cmdComment string) Command {
 		return fmt.Sprintf("%.15x", h.Sum(nil))
 	}()
 
-	cmd := Command{formattedHash, cmdString, cmdComment}
+	cmd := Command{formattedHash, cmdString, cmdComment, time.Now(), time.Now()}
 
 	return cmd
 }
@@ -262,6 +265,7 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	sc.CmdString = cmd.CmdString
 	sc.Comment = cmd.Comment
 	sc.StartTime = time.Now()
+	sc.Modificationtime = time.Now()
 
 	// Create a channel to hold exit status
 	c := make(chan int)
@@ -275,7 +279,7 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	// Set end time after we receive from the channel
 	sc.EndTime = time.Now()
 
-	fmt.Fprintf(os.Stdout, "Command status: %d\n", status)
+	log.Printf("Command status for %s: %d\n", sc.CmdHash, status)
 
 	return sc
 }
@@ -296,12 +300,11 @@ func RunCommand(sc *ScheduledCommand, c chan int) {
 
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "Command status: %d\n", err)
-
 	}
 
 	defer os.Remove(tempFile.Name())
 
-	fmt.Fprintf(os.Stdout, "Created "+tempFile.Name()+"\n")
+	//fmt.Fprintf(os.Stdout, "Created "+tempFile.Name()+"\n")
 
 	_, err = tempFile.WriteString("#!/bin/sh\n\n" + sc.CmdString)
 

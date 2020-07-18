@@ -2,18 +2,16 @@ package recmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"testing"
 	"time"
 )
 
 func TestReadCmdHistoryFile(t *testing.T) {
 
-	cmd := Command{"abc", "ls", "list files"}
-	cmd2 := Command{"def", "df", "Show disk usage"}
+	cmd := Command{"abc", "ls", "list files", time.Now(), time.Now()}
+	cmd2 := Command{"def", "df", "Show disk usage", time.Now(), time.Now()}
 
 	cmds := []Command{cmd, cmd2}
 
@@ -30,8 +28,12 @@ func TestReadCmdHistoryFile(t *testing.T) {
 
 	readCmds := ReadCmdHistoryFile(".")
 
-	if !reflect.DeepEqual(cmds, readCmds) {
-		t.Error("The command histories are not equal")
+	// Check to make sure that the commands we wrote are the ones we created by comparing hashes
+	for i := 0; i < len(cmds); i++ {
+		if cmds[i].CmdHash != readCmds[i].CmdHash {
+			t.Error("The command histories are not equal")
+		}
+
 	}
 
 	t.Cleanup(func() {
@@ -65,12 +67,36 @@ func TestWriteCmdHistoryFile(t *testing.T) {
 
 	readCmds := ReadCmdHistoryFile(".")
 
-	// Add cmd3 to our slice for comparison
-	updatedCmds := append(cmds, cmd3)
+	found1, found2, found3 := false, false, false
 
-	if !reflect.DeepEqual(updatedCmds, readCmds) {
-		t.Error("The command histories are not equal")
+	for _, c := range readCmds {
+		if c.CmdString == "ls" {
+			found1 = true
+		} else if c.CmdString == "df" {
+			found2 = true
+		} else if c.CmdString == "top" {
+			found3 = true
+		}
 	}
+
+	if found1 == false {
+		t.Error("The ls command was missing from history")
+	}
+
+	if found2 == false {
+		t.Error("The df command was missing from history")
+	}
+
+	if found3 == false {
+		t.Error("The top command was missing from history")
+	}
+
+	// Add cmd3 to our slice for comparison
+	// updatedCmds := append(cmds, cmd3)
+
+	// if !reflect.DeepEqual(updatedCmds, readCmds) {
+	// 	t.Error("The command histories are not equal")
+	// }
 
 	t.Cleanup(func() {
 		os.Remove(historyFile)
@@ -140,12 +166,22 @@ func TestRunMockCommand(t *testing.T) {
 
 	sc := ScheduleCommand(cmd, RunMockCommand)
 
-	// if sc.ExitStatus != 0 {
-	// 	t.Error("The exit status of the command was not 0")
-	// }
-	data, _ := json.MarshalIndent(sc, "", "\t")
+	if sc.ExitStatus != 99 {
+		t.Error("The exit status of the command was not 0")
+	}
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-	fmt.Println(string(data))
+	time.Sleep(1 * time.Second)
+
+	sc = ScheduleCommand(cmd, RunMockCommand)
+
+	if sc.ExitStatus != 99 {
+		t.Error("The exit status of the command was not 0")
+	}
+
+	// data, _ = json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
 	t.Cleanup(func() {
 		os.Remove(historyFile)
@@ -161,9 +197,8 @@ func TestRunCommand(t *testing.T) {
 	if sc.ExitStatus != 0 {
 		t.Error("The exit status of the command was not 0")
 	}
-	data, _ := json.MarshalIndent(sc, "", "\t")
-
-	fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
 	t.Cleanup(func() {
 		os.Remove(historyFile)
@@ -180,9 +215,8 @@ func TestRunCommandInvalid(t *testing.T) {
 	if sc.ExitStatus == 0 {
 		t.Error("The exit status of the command was 0")
 	}
-	data, _ := json.MarshalIndent(sc, "", "\t")
-
-	fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
 	t.Cleanup(func() {
 		os.Remove(historyFile)
@@ -200,9 +234,8 @@ func TestRunCommandMultiple(t *testing.T) {
 		t.Error("The exit status of the command was not 0")
 	}
 
-	data, _ := json.MarshalIndent(sc, "", "\t")
-
-	fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
 	t.Cleanup(func() {
 		os.Remove(historyFile)
@@ -220,9 +253,8 @@ func TestRunCommandLongRunning(t *testing.T) {
 		t.Error("The exit status of the command was not 0")
 	}
 
-	data, _ := json.MarshalIndent(sc, "", "\t")
-
-	fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
 	t.Cleanup(func() {
 		os.Remove(historyFile)
@@ -248,9 +280,8 @@ func TestRunByCommandString(t *testing.T) {
 		t.Error("The exit status of the command was not 0")
 	}
 
-	data, _ := json.MarshalIndent(sc, "", "\t")
-
-	fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
 	if sc.ExitStatus != 0 {
 		t.Error("Exit status was not 0")
@@ -278,8 +309,8 @@ func TestRunByCommandHash(t *testing.T) {
 	ret := SelectCmd(".", "commandHash", "uname")
 
 	// Show the contents of the command. The fields should be empty.
-	data, _ := json.MarshalIndent(ret, "", "\t")
-	fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(ret, "", "\t")
+	// fmt.Println(string(data))
 
 	if ret.CmdHash != "" {
 		t.Error("Accidentally did not find an empty command")
@@ -292,17 +323,17 @@ func TestRunByCommandHash(t *testing.T) {
 }
 
 func TestDeleteCommand(t *testing.T) {
-	cmd := Command{"abc", "cp", "comment a"}
-	cmd2 := Command{"def", "mv", "comment b"}
-	cmd3 := Command{"ghk", "sleep", "comment c"}
+	cmd := Command{"abc", "cp", "comment a", time.Now(), time.Now()}
+	cmd2 := Command{"def", "mv", "comment b", time.Now(), time.Now()}
+	cmd3 := Command{"ghk", "sleep", "comment c", time.Now(), time.Now()}
 
 	cmds := []Command{cmd, cmd2, cmd3}
 
 	// Minitest 1: Test whether we can remove a command by its hash
 	ret := DeleteCmd(cmds, "commandHash", "abc")
 
-	data, _ := json.MarshalIndent(ret, "", "\t")
-	fmt.Println(string(data))
+	//data, _ := json.MarshalIndent(ret, "", "\t")
+	//fmt.Println(string(data))
 
 	for _, cmd := range ret {
 		if cmd.CmdHash == "abc" {
@@ -315,8 +346,8 @@ func TestDeleteCommand(t *testing.T) {
 
 	ret = DeleteCmd(cmds, "commandString", "mv")
 
-	data, _ = json.MarshalIndent(ret, "", "\t")
-	fmt.Println(string(data))
+	//data, _ = json.MarshalIndent(ret, "", "\t")
+	//fmt.Println(string(data))
 
 	for _, cmd := range ret {
 		if cmd.CmdHash == "def" {
@@ -361,9 +392,8 @@ func TestOverwriteCmdHistoryFile(t *testing.T) {
 
 	cmds = ReadCmdHistoryFile(".")
 
-	updatedData, _ := json.MarshalIndent(cmds, "", "\t")
-
-	fmt.Println(string(updatedData))
+	//updatedData, _ := json.MarshalIndent(cmds, "", "\t")
+	//fmt.Println(string(updatedData))
 
 	for _, cmd := range ret {
 		if cmd.CmdString == "sleep" {
