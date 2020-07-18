@@ -128,7 +128,8 @@ func SelectCmd(dir string, field string, value string) Command {
 	return Command{}
 }
 
-// DeleteCmd deletes a command
+// DeleteCmd deletes a command. It's best to pass in the commandHash
+// because commands may look similar.
 func DeleteCmd(cmds []Command, field string, value string) []Command {
 
 	foundIndex := -1
