@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 const testdataDir = "testdata"
@@ -39,38 +40,38 @@ func TestMain(m *testing.M) {
 	os.Exit(status)
 }
 
-// func TestReadCmdHistoryFile(t *testing.T) {
+func TestReadCmdHistoryFile(t *testing.T) {
 
-// 	cmd := Command{"abc", "ls", "list files", time.Now(), time.Now()}
-// 	cmd2 := Command{"def", "df", "Show disk usage", time.Now(), time.Now()}
+	cmd := Command{"abc", "ls", "list files", time.Now(), time.Now()}
+	cmd2 := Command{"def", "df", "Show disk usage", time.Now(), time.Now()}
 
-// 	cmds := []Command{cmd, cmd2}
+	cmds := []Command{cmd, cmd2}
 
-// 	// Convert the struct to JSON
-// 	data, err := json.MarshalIndent(cmds, "", "\t")
+	// Convert the struct to JSON
+	data, err := json.MarshalIndent(cmds, "", "\t")
 
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	mode := int(0644)
+	mode := int(0644)
 
-// 	ioutil.WriteFile(testHistoryFile, data, os.FileMode(mode))
+	ioutil.WriteFile(testHistoryFile, data, os.FileMode(mode))
 
-// 	readCmds := ReadCmdHistoryFile(testdataDir)
+	readCmds := ReadCmdHistoryFile(testdataDir)
 
-// 	// Check to make sure that the commands we wrote are the ones we created by comparing hashes
-// 	for i := 0; i < len(cmds); i++ {
-// 		if cmds[i].CmdHash != readCmds[i].CmdHash {
-// 			t.Error("The command histories are not equal")
-// 		}
+	// Check to make sure that the commands we wrote are the ones we created by comparing hashes
+	for i := 0; i < len(cmds); i++ {
+		if cmds[i].CmdHash != readCmds[i].CmdHash {
+			t.Error("The command histories are not equal")
+		}
 
-// 	}
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
-// }
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
 func TestWriteCmdHistoryFile(t *testing.T) {
 
@@ -122,311 +123,311 @@ func TestWriteCmdHistoryFile(t *testing.T) {
 		t.Error("The top command was missing from history")
 	}
 
-	// t.Cleanup(func() {
-	// 	os.Remove(testHistoryFile)
-	// })
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 }
 
-// func TestWriteSameCommands(t *testing.T) {
+func TestWriteSameCommands(t *testing.T) {
 
-// 	cmd := NewCommand("ls", "list files")
-// 	cmd2 := NewCommand("ls", "Show disk usage")
+	cmd := NewCommand("ls", "list files")
+	cmd2 := NewCommand("ls", "Show disk usage")
 
-// 	if WriteCmdHistoryFile(testdataDir, cmd) == false {
-// 		t.Error("Unable to write " + cmd.CmdString)
-// 	}
+	if WriteCmdHistoryFile(testdataDir, cmd) == false {
+		t.Error("Unable to write " + cmd.CmdString)
+	}
 
-// 	if WriteCmdHistoryFile(testdataDir, cmd2) == true {
-// 		t.Error("Accidentally wrote " + cmd2.CmdString)
-// 	}
+	if WriteCmdHistoryFile(testdataDir, cmd2) == true {
+		t.Error("Accidentally wrote " + cmd2.CmdString)
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
 
-// func TestNewCommand(t *testing.T) {
+func TestNewCommand(t *testing.T) {
 
-// 	cmd := NewCommand("df /usr", "Find disk usage")
+	cmd := NewCommand("df /usr", "Find disk usage")
 
-// 	if cmd.CmdString != "df /usr" {
-// 		t.Error(cmd.CmdString + " was not expected")
-// 	}
+	if cmd.CmdString != "df /usr" {
+		t.Error(cmd.CmdString + " was not expected")
+	}
 
-// 	cmd2 := NewCommand("free", "Find memory usage")
+	cmd2 := NewCommand("free", "Find memory usage")
 
-// 	if cmd2.CmdString != "free" {
-// 		t.Error(cmd.CmdString + " was not expected")
-// 	}
+	if cmd2.CmdString != "free" {
+		t.Error(cmd.CmdString + " was not expected")
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
-// }
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
-// func TestMultipleNewCommand(t *testing.T) {
+func TestMultipleNewCommand(t *testing.T) {
 
-// 	cmd := NewCommand("df /usr fdfdfsaasf fsfadf", "Find disk usage")
-// 	cmd2 := NewCommand("df /usr fdfdfsaasf fsfadf", "Find disk usage")
+	cmd := NewCommand("df /usr fdfdfsaasf fsfadf", "Find disk usage")
+	cmd2 := NewCommand("df /usr fdfdfsaasf fsfadf", "Find disk usage")
 
-// 	// Test whether the hashes are the same. They should be because the command line is the same.
-// 	if cmd.CmdHash != cmd2.CmdHash {
+	// Test whether the hashes are the same. They should be because the command line is the same.
+	if cmd.CmdHash != cmd2.CmdHash {
 
-// 		// fmt.Println(cmd.CmdHash)
-// 		// fmt.Println(cmd2.CmdHash)
+		// fmt.Println(cmd.CmdHash)
+		// fmt.Println(cmd2.CmdHash)
 
-// 		t.Error("The hashes for the two commands were not the same")
-// 	}
+		t.Error("The hashes for the two commands were not the same")
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
-// }
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
-// func TestRunMockCommand(t *testing.T) {
+func TestRunMockCommand(t *testing.T) {
 
-// 	cmd := NewCommand("ls", "List files")
+	cmd := NewCommand("ls", "List files")
 
-// 	sc := ScheduleCommand(cmd, RunMockCommand)
+	sc := ScheduleCommand(cmd, RunMockCommand)
 
-// 	if sc.ExitStatus != 99 {
-// 		t.Error("The exit status of the command was not 0")
-// 	}
-// 	// data, _ := json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	if sc.ExitStatus != 99 {
+		t.Error("The exit status of the command was not 0")
+	}
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Second)
 
-// 	sc = ScheduleCommand(cmd, RunMockCommand)
+	sc = ScheduleCommand(cmd, RunMockCommand)
 
-// 	if sc.ExitStatus != 99 {
-// 		t.Error("The exit status of the command was not 0")
-// 	}
+	if sc.ExitStatus != 99 {
+		t.Error("The exit status of the command was not 0")
+	}
 
-// 	// data, _ = json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	// data, _ = json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
-// }
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
-// func TestRunCommand(t *testing.T) {
+func TestRunCommand(t *testing.T) {
 
-// 	cmd := NewCommand("ls /", "List files")
+	cmd := NewCommand("ls /", "List files")
 
-// 	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunCommand)
 
-// 	if sc.ExitStatus != 0 {
-// 		t.Error("The exit status of the command was not 0")
-// 	}
-// 	// data, _ := json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	if sc.ExitStatus != 0 {
+		t.Error("The exit status of the command was not 0")
+	}
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
 
-// func TestRunCommandInvalid(t *testing.T) {
+func TestRunCommandInvalid(t *testing.T) {
 
-// 	cmd := NewCommand("lslsls", "List files")
+	cmd := NewCommand("lslsls", "List files")
 
-// 	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunCommand)
 
-// 	if sc.ExitStatus == 0 {
-// 		t.Error("The exit status of the command was 0")
-// 	}
-// 	// data, _ := json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	if sc.ExitStatus == 0 {
+		t.Error("The exit status of the command was 0")
+	}
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
 
-// func TestRunCommandMultiple(t *testing.T) {
+func TestRunCommandMultiple(t *testing.T) {
 
-// 	cmd := NewCommand("cd /; ls; cd /home; ls", "List files")
+	cmd := NewCommand("cd /; ls; cd /home; ls", "List files")
 
-// 	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunCommand)
 
-// 	if sc.ExitStatus != 0 {
-// 		t.Error("The exit status of the command was not 0")
-// 	}
+	if sc.ExitStatus != 0 {
+		t.Error("The exit status of the command was not 0")
+	}
 
-// 	// data, _ := json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
 
-// func TestRunCommandLongRunning(t *testing.T) {
+func TestRunCommandLongRunning(t *testing.T) {
 
-// 	cmd := NewCommand("sleep 1", "Take a brief nap")
+	cmd := NewCommand("sleep 1", "Take a brief nap")
 
-// 	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunCommand)
 
-// 	if sc.ExitStatus != 0 {
-// 		t.Error("The exit status of the command was not 0")
-// 	}
+	if sc.ExitStatus != 0 {
+		t.Error("The exit status of the command was not 0")
+	}
 
-// 	// data, _ := json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
 
-// func TestRunByCommandString(t *testing.T) {
+func TestRunByCommandString(t *testing.T) {
 
-// 	cmd := NewCommand("uname", "Show my name")
+	cmd := NewCommand("uname", "Show my name")
 
-// 	result := WriteCmdHistoryFile(testdataDir, cmd)
+	result := WriteCmdHistoryFile(testdataDir, cmd)
 
-// 	if result != true {
-// 		t.Error("Unable to write history file")
-// 	}
+	if result != true {
+		t.Error("Unable to write history file")
+	}
 
-// 	ret := SelectCmd(testdataDir, "commandString", "uname")
+	ret := SelectCmd(testdataDir, "commandString", "uname")
 
-// 	sc := ScheduleCommand(ret, RunCommand)
+	sc := ScheduleCommand(ret, RunCommand)
 
-// 	if sc.ExitStatus != 0 {
-// 		t.Error("The exit status of the command was not 0")
-// 	}
+	if sc.ExitStatus != 0 {
+		t.Error("The exit status of the command was not 0")
+	}
 
-// 	// data, _ := json.MarshalIndent(sc, "", "\t")
-// 	// fmt.Println(string(data))
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
 
-// 	if sc.ExitStatus != 0 {
-// 		t.Error("Exit status was not 0")
-// 	}
+	if sc.ExitStatus != 0 {
+		t.Error("Exit status was not 0")
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
-// }
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
-// // This test attempts to run a command by a matching hash. For this test, it will fail on purpose due
-// // to an invalid hash. In real life, users or the UI will most likely select commands by their hash since
-// // it should be a unique identifier.
-// func TestRunByCommandHash(t *testing.T) {
+// This test attempts to run a command by a matching hash. For this test, it will fail on purpose due
+// to an invalid hash. In real life, users or the UI will most likely select commands by their hash since
+// it should be a unique identifier.
+func TestRunByCommandHash(t *testing.T) {
 
-// 	cmd := NewCommand("uname", "Show my name")
+	cmd := NewCommand("uname", "Show my name")
 
-// 	result := WriteCmdHistoryFile(testdataDir, cmd)
+	result := WriteCmdHistoryFile(testdataDir, cmd)
 
-// 	if result != true {
-// 		t.Error("Unable to write history file")
-// 	}
+	if result != true {
+		t.Error("Unable to write history file")
+	}
 
-// 	// Attempt to select a command whose hash is 'uname'. This should never succeed.
-// 	ret := SelectCmd(testdataDir, "commandHash", "uname")
+	// Attempt to select a command whose hash is 'uname'. This should never succeed.
+	ret := SelectCmd(testdataDir, "commandHash", "uname")
 
-// 	// Show the contents of the command. The fields should be empty.
-// 	// data, _ := json.MarshalIndent(ret, "", "\t")
-// 	// fmt.Println(string(data))
+	// Show the contents of the command. The fields should be empty.
+	// data, _ := json.MarshalIndent(ret, "", "\t")
+	// fmt.Println(string(data))
 
-// 	if ret.CmdHash != "" {
-// 		t.Error("Accidentally did not find an empty command")
-// 	}
+	if ret.CmdHash != "" {
+		t.Error("Accidentally did not find an empty command")
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
 
-// func TestDeleteCommand(t *testing.T) {
-// 	cmd := Command{"abc", "cp", "comment a", time.Now(), time.Now()}
-// 	cmd2 := Command{"def", "mv", "comment b", time.Now(), time.Now()}
-// 	cmd3 := Command{"ghk", "sleep", "comment c", time.Now(), time.Now()}
+func TestDeleteCommand(t *testing.T) {
+	cmd := Command{"abc", "cp", "comment a", time.Now(), time.Now()}
+	cmd2 := Command{"def", "mv", "comment b", time.Now(), time.Now()}
+	cmd3 := Command{"ghk", "sleep", "comment c", time.Now(), time.Now()}
 
-// 	cmds := []Command{cmd, cmd2, cmd3}
+	cmds := []Command{cmd, cmd2, cmd3}
 
-// 	// Minitest 1: Test whether we can remove a command by its hash
-// 	ret := DeleteCmd(cmds, "commandHash", "abc")
+	// Minitest 1: Test whether we can remove a command by its hash
+	ret := DeleteCmd(cmds, "commandHash", "abc")
 
-// 	//data, _ := json.MarshalIndent(ret, "", "\t")
-// 	//fmt.Println(string(data))
+	//data, _ := json.MarshalIndent(ret, "", "\t")
+	//fmt.Println(string(data))
 
-// 	for _, cmd := range ret {
-// 		if cmd.CmdHash == "abc" {
-// 			t.Error("Command was not deleted as expected")
-// 		}
-// 	}
+	for _, cmd := range ret {
+		if cmd.CmdHash == "abc" {
+			t.Error("Command was not deleted as expected")
+		}
+	}
 
-// 	// Minitest 2: Test whether we can remove a command by its name
-// 	cmds = append(ret, cmd)
+	// Minitest 2: Test whether we can remove a command by its name
+	cmds = append(ret, cmd)
 
-// 	ret = DeleteCmd(cmds, "commandString", "mv")
+	ret = DeleteCmd(cmds, "commandString", "mv")
 
-// 	//data, _ = json.MarshalIndent(ret, "", "\t")
-// 	//fmt.Println(string(data))
+	//data, _ = json.MarshalIndent(ret, "", "\t")
+	//fmt.Println(string(data))
 
-// 	for _, cmd := range ret {
-// 		if cmd.CmdHash == "def" {
-// 			t.Error("Command was not deleted as expected")
-// 		}
-// 	}
+	for _, cmd := range ret {
+		if cmd.CmdHash == "def" {
+			t.Error("Command was not deleted as expected")
+		}
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
-// }
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
-// func TestOverwriteCmdHistoryFile(t *testing.T) {
+func TestOverwriteCmdHistoryFile(t *testing.T) {
 
-// 	cmd := NewCommand("cp", "comment a")
-// 	cmd2 := NewCommand("mv", "comment b")
-// 	cmd3 := NewCommand("sleep", "comment c")
+	cmd := NewCommand("cp", "comment a")
+	cmd2 := NewCommand("mv", "comment b")
+	cmd3 := NewCommand("sleep", "comment c")
 
-// 	if WriteCmdHistoryFile(testdataDir, cmd) == false {
-// 		t.Error("Unable to write " + cmd.CmdString)
-// 	}
+	if WriteCmdHistoryFile(testdataDir, cmd) == false {
+		t.Error("Unable to write " + cmd.CmdString)
+	}
 
-// 	time.Sleep(1 * time.Second)
-// 	if WriteCmdHistoryFile(testdataDir, cmd2) == false {
-// 		t.Error("Unable to write " + cmd2.CmdString)
-// 	}
+	time.Sleep(1 * time.Second)
+	if WriteCmdHistoryFile(testdataDir, cmd2) == false {
+		t.Error("Unable to write " + cmd2.CmdString)
+	}
 
-// 	if WriteCmdHistoryFile(testdataDir, cmd3) == false {
-// 		t.Error("Unable to write " + cmd3.CmdString)
-// 	}
+	if WriteCmdHistoryFile(testdataDir, cmd3) == false {
+		t.Error("Unable to write " + cmd3.CmdString)
+	}
 
-// 	cmds := ReadCmdHistoryFile(testdataDir)
+	cmds := ReadCmdHistoryFile(testdataDir)
 
-// 	ret := DeleteCmd(cmds, "commandString", "sleep")
+	ret := DeleteCmd(cmds, "commandString", "sleep")
 
-// 	// This change will remove the sleep command from the history file
-// 	result := OverwriteCmdHistoryFile(testdataDir, ret)
+	// This change will remove the sleep command from the history file
+	result := OverwriteCmdHistoryFile(testdataDir, ret)
 
-// 	if result != true {
-// 		t.Error("Unable to overwrite history file")
-// 	}
+	if result != true {
+		t.Error("Unable to overwrite history file")
+	}
 
-// 	cmds = ReadCmdHistoryFile(testdataDir)
+	cmds = ReadCmdHistoryFile(testdataDir)
 
-// 	//updatedData, _ := json.MarshalIndent(cmds, "", "\t")
-// 	//fmt.Println(string(updatedData))
+	//updatedData, _ := json.MarshalIndent(cmds, "", "\t")
+	//fmt.Println(string(updatedData))
 
-// 	for _, cmd := range ret {
-// 		if cmd.CmdString == "sleep" {
-// 			t.Error("Command was not deleted as expected")
-// 		}
-// 	}
+	for _, cmd := range ret {
+		if cmd.CmdString == "sleep" {
+			t.Error("Command was not deleted as expected")
+		}
+	}
 
-// 	t.Cleanup(func() {
-// 		os.Remove(testHistoryFile)
-// 	})
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
 
-// }
+}
