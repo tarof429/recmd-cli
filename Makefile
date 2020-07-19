@@ -1,11 +1,11 @@
 build:
 	go mod download
-	go build -o recmd
+	go build -o recmd-cli
 
 default: build
 
 test:
-	go test
+	(cd recmd; go test)
 
 clean:
 	rm -f recmd

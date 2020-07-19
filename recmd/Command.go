@@ -205,7 +205,7 @@ func WriteCmdHistoryFile(dir string, cmd Command) bool {
 	var cmds []Command
 
 	// Read history file
-	data, err := ioutil.ReadFile(historyFile)
+	data, err := ioutil.ReadFile(dir + "/" + historyFile)
 
 	// An error occured while reading historyFile.
 	if err != nil {
@@ -237,7 +237,7 @@ func WriteCmdHistoryFile(dir string, cmd Command) bool {
 
 	mode := int(0644)
 
-	error := ioutil.WriteFile(historyFile, updatedData, os.FileMode(mode))
+	error := ioutil.WriteFile(dir+"/"+historyFile, updatedData, os.FileMode(mode))
 
 	return error == nil
 
