@@ -8,7 +8,13 @@ import (
 
 func main() {
 
-	cmd := recmd.Command{}
-	cmd.CmdString = "foo"
-	fmt.Println(cmd.CmdString)
+	cmd := recmd.NewCommand("ls /bin", "List files")
+
+	sc := recmd.ScheduleCommand(cmd, recmd.RunShellScriptCommand)
+
+	fmt.Println(sc.Stdout)
+
+	// data, _ := json.MarshalIndent(sc, "", "\t")
+	// fmt.Println(string(data))
+
 }

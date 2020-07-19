@@ -257,7 +257,9 @@ func NewCommand(cmdString string, cmdComment string) Command {
 	return cmd
 }
 
-// ScheduleCommand creates a ScheduledCommand from a Command
+// ScheduleCommand runs a Command based on a function passed in as the second parameter.
+// This gives the ability to run Commands in multiple ways; for example, as a "mock" command
+// (RunMockCommand) or a shell script command (RunShellScriptCommand).
 func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) ScheduledCommand {
 	var sc ScheduledCommand
 
@@ -293,8 +295,8 @@ func RunMockCommand(sc *ScheduledCommand, c chan int) {
 	c <- sc.ExitStatus
 }
 
-// RunCommand runs a command
-func RunCommand(sc *ScheduledCommand, c chan int) {
+// RunShellScriptCommand runs a command written to a temporary file
+func RunShellScriptCommand(sc *ScheduledCommand, c chan int) {
 
 	tempFile, err := ioutil.TempFile(os.TempDir(), "recmd-")
 

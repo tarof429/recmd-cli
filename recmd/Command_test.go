@@ -213,11 +213,11 @@ func TestRunMockCommand(t *testing.T) {
 	})
 }
 
-func TestRunCommand(t *testing.T) {
+func TestRunShellScriptCommand(t *testing.T) {
 
 	cmd := NewCommand("ls /", "List files")
 
-	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunShellScriptCommand)
 
 	if sc.ExitStatus != 0 {
 		t.Error("The exit status of the command was not 0")
@@ -231,11 +231,11 @@ func TestRunCommand(t *testing.T) {
 
 }
 
-func TestRunCommandInvalid(t *testing.T) {
+func TestRunShellScriptCommandInvalid(t *testing.T) {
 
 	cmd := NewCommand("lslsls", "List files")
 
-	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunShellScriptCommand)
 
 	if sc.ExitStatus == 0 {
 		t.Error("The exit status of the command was 0")
@@ -249,11 +249,11 @@ func TestRunCommandInvalid(t *testing.T) {
 
 }
 
-func TestRunCommandMultiple(t *testing.T) {
+func TestRunShellScriptCommandMultiple(t *testing.T) {
 
 	cmd := NewCommand("cd /; ls; cd /home; ls", "List files")
 
-	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunShellScriptCommand)
 
 	if sc.ExitStatus != 0 {
 		t.Error("The exit status of the command was not 0")
@@ -268,11 +268,11 @@ func TestRunCommandMultiple(t *testing.T) {
 
 }
 
-func TestRunCommandLongRunning(t *testing.T) {
+func TestRunShellScriptCommandLongRunning(t *testing.T) {
 
 	cmd := NewCommand("sleep 1", "Take a brief nap")
 
-	sc := ScheduleCommand(cmd, RunCommand)
+	sc := ScheduleCommand(cmd, RunShellScriptCommand)
 
 	if sc.ExitStatus != 0 {
 		t.Error("The exit status of the command was not 0")
@@ -299,7 +299,7 @@ func TestRunByCommandString(t *testing.T) {
 
 	ret := SelectCmd(testdataDir, "commandString", "uname")
 
-	sc := ScheduleCommand(ret, RunCommand)
+	sc := ScheduleCommand(ret, RunShellScriptCommand)
 
 	if sc.ExitStatus != 0 {
 		t.Error("The exit status of the command was not 0")
