@@ -11,7 +11,7 @@ import (
 )
 
 const testdataDir = "testdata"
-const testHistoryFile = testdataDir + "/cmd_history.json"
+const testHistoryFile = testdataDir + "/.cmd_history.json"
 
 func TestMain(m *testing.M) {
 	fmt.Println("Running tests...")
@@ -58,7 +58,11 @@ func TestReadCmdHistoryFile(t *testing.T) {
 
 	ioutil.WriteFile(testHistoryFile, data, os.FileMode(mode))
 
-	readCmds := ReadCmdHistoryFile(testdataDir)
+	readCmds, err := ReadCmdHistoryFile(testdataDir)
+
+	if err != nil {
+		t.Error("an error occured while reading command history")
+	}
 
 	// Check to make sure that the commands we wrote are the ones we created by comparing hashes
 	for i := 0; i < len(cmds); i++ {
@@ -73,10 +77,17 @@ func TestReadCmdHistoryFile(t *testing.T) {
 	})
 }
 
+func TestCreateCmdHistoryFiel(t *testing.T) {
+	if CreateCmdHistoryFile(testdataDir) == false {
+		t.Fail()
+	}
+
+}
+
 func TestWriteCmdHistoryFile(t *testing.T) {
 
-	cmd := NewCommand("ls", "list files")
-	cmd2 := NewCommand("df", "Show disk usage")
+	cmd := NewCommand("find / -type f -perm 0777 -print -exec chmod 644 {} \\;", "Find all 777 permission files and use chmod command to set permissions to 644")
+	cmd2 := NewCommand("df --print-type --total --human-readable /home /dev/sda6", "Display Total Information of Partitions in Human Readable Terms")
 
 	cmds := []Command{cmd, cmd2}
 
@@ -93,20 +104,20 @@ func TestWriteCmdHistoryFile(t *testing.T) {
 	ioutil.WriteFile(testHistoryFile, data, os.FileMode(mode))
 
 	// Define a new command
-	cmd3 := NewCommand("top", "Show active processes")
+	cmd3 := NewCommand("rsync -avz rpmpkgs/ root@192.168.0.101:/home/", "Copy a Directory from Local Server to a Remote Server")
 
 	WriteCmdHistoryFile(testdataDir, cmd3)
 
-	readCmds := ReadCmdHistoryFile(testdataDir)
+	readCmds, err := ReadCmdHistoryFile(testdataDir)
 
 	found1, found2, found3 := false, false, false
 
 	for _, c := range readCmds {
-		if c.CmdString == "ls" {
+		if c.CmdString == "find / -type f -perm 0777 -print -exec chmod 644 {} \\;" {
 			found1 = true
-		} else if c.CmdString == "df" {
+		} else if c.CmdString == "df --print-type --total --human-readable /home /dev/sda6" {
 			found2 = true
-		} else if c.CmdString == "top" {
+		} else if c.CmdString == "rsync -avz rpmpkgs/ root@192.168.0.101:/home/" {
 			found3 = true
 		}
 	}
@@ -122,6 +133,15 @@ func TestWriteCmdHistoryFile(t *testing.T) {
 	if found3 == false {
 		t.Error("The top command was missing from history")
 	}
+
+	// An attempt to display the commands in a table
+	// fmt.Printf("COMMAND ID\tCOMMAND\tDESCRIPTION\n")
+
+	// for _, c := range readCmds {
+
+	// 	fmt.Printf("%s\t%s\t%s\t%v\t%v\n", c.CmdHash, c.CmdString, c.Comment, c.Creationtime, c.Modificationtime)
+
+	// }
 
 	t.Cleanup(func() {
 		os.Remove(testHistoryFile)
@@ -225,9 +245,9 @@ func TestRunShellScriptCommand(t *testing.T) {
 	// data, _ := json.MarshalIndent(sc, "", "\t")
 	// fmt.Println(string(data))
 
-	t.Cleanup(func() {
-		os.Remove(testHistoryFile)
-	})
+	// t.Cleanup(func() {
+	// 	os.Remove(testHistoryFile)
+	// })
 
 }
 
@@ -297,7 +317,11 @@ func TestRunByCommandString(t *testing.T) {
 		t.Error("Unable to write history file")
 	}
 
-	ret := SelectCmd(testdataDir, "commandString", "uname")
+	ret, err := SelectCmd(testdataDir, "commandString", "uname")
+
+	if err != nil {
+		t.Error("Unable to read history file")
+	}
 
 	sc := ScheduleCommand(ret, RunShellScriptCommand)
 
@@ -331,7 +355,11 @@ func TestRunByCommandHash(t *testing.T) {
 	}
 
 	// Attempt to select a command whose hash is 'uname'. This should never succeed.
-	ret := SelectCmd(testdataDir, "commandHash", "uname")
+	ret, err := SelectCmd(testdataDir, "commandHash", "uname")
+
+	if err != nil {
+		t.Error("Unable to read history file")
+	}
 
 	// Show the contents of the command. The fields should be empty.
 	// data, _ := json.MarshalIndent(ret, "", "\t")
@@ -347,37 +375,75 @@ func TestRunByCommandHash(t *testing.T) {
 
 }
 
-func TestDeleteCommand(t *testing.T) {
+func TestDeleteCommandUsingCommandHash(t *testing.T) {
 	cmd := Command{"abc", "cp", "comment a", time.Now(), time.Now()}
 	cmd2 := Command{"def", "mv", "comment b", time.Now(), time.Now()}
 	cmd3 := Command{"ghk", "sleep", "comment c", time.Now(), time.Now()}
 
-	cmds := []Command{cmd, cmd2, cmd3}
+	WriteCmdHistoryFile(testdataDir, cmd)
+	WriteCmdHistoryFile(testdataDir, cmd2)
+	WriteCmdHistoryFile(testdataDir, cmd3)
 
-	// Minitest 1: Test whether we can remove a command by its hash
-	ret := DeleteCmd(cmds, "commandHash", "abc")
+	foundIndex := DeleteCmd(testdataDir, "def", "commandHash")
 
-	//data, _ := json.MarshalIndent(ret, "", "\t")
-	//fmt.Println(string(data))
+	if foundIndex == -1 {
+		t.Error("Command was not deleted")
+	}
 
+	ret, err := ReadCmdHistoryFile(testdataDir)
+
+	if err != nil {
+		t.Error("Received an error")
+	}
+
+	found := false
 	for _, cmd := range ret {
-		if cmd.CmdHash == "abc" {
-			t.Error("Command was not deleted as expected")
+		if cmd.CmdHash == "def" {
+			found = true
+
 		}
 	}
 
-	// Minitest 2: Test whether we can remove a command by its name
-	cmds = append(ret, cmd)
+	if found == true {
+		t.Error("Command was not deleted as expected")
+	}
 
-	ret = DeleteCmd(cmds, "commandString", "mv")
+	t.Cleanup(func() {
+		os.Remove(testHistoryFile)
+	})
+}
 
-	//data, _ = json.MarshalIndent(ret, "", "\t")
-	//fmt.Println(string(data))
+func TestDeleteCommandUsingCommandName(t *testing.T) {
+	cmd := Command{"abc", "cp", "comment a", time.Now(), time.Now()}
+	cmd2 := Command{"def", "mv", "comment b", time.Now(), time.Now()}
+	cmd3 := Command{"ghk", "sleep", "comment c", time.Now(), time.Now()}
 
+	WriteCmdHistoryFile(testdataDir, cmd)
+	WriteCmdHistoryFile(testdataDir, cmd2)
+	WriteCmdHistoryFile(testdataDir, cmd3)
+
+	foundIndex := DeleteCmd(testdataDir, "sleep", "commandString")
+
+	if foundIndex == -1 {
+		t.Error("Command was not deleted")
+	}
+
+	ret, err := ReadCmdHistoryFile(testdataDir)
+
+	if err != nil {
+		t.Error("Received an error")
+	}
+
+	found := false
 	for _, cmd := range ret {
-		if cmd.CmdHash == "def" {
-			t.Error("Command was not deleted as expected")
+		if cmd.CmdString == "sle" {
+			found = true
+
 		}
+	}
+
+	if found == true {
+		t.Error("Command was not deleted as expected")
 	}
 
 	t.Cleanup(func() {
@@ -404,23 +470,27 @@ func TestOverwriteCmdHistoryFile(t *testing.T) {
 		t.Error("Unable to write " + cmd3.CmdString)
 	}
 
-	cmds := ReadCmdHistoryFile(testdataDir)
+	cmds, err := ReadCmdHistoryFile(testdataDir)
 
-	ret := DeleteCmd(cmds, "commandString", "sleep")
-
-	// This change will remove the sleep command from the history file
-	result := OverwriteCmdHistoryFile(testdataDir, ret)
-
-	if result != true {
-		t.Error("Unable to overwrite history file")
+	if err != nil {
+		t.Error("Unable to read history file")
 	}
 
-	cmds = ReadCmdHistoryFile(testdataDir)
+	foundIndex := DeleteCmd(testdataDir, "sleep", "commandString")
 
+	if foundIndex == -1 {
+		t.Error("Failed to delete command")
+	}
+
+	cmds, err = ReadCmdHistoryFile(testdataDir)
+
+	if err != nil {
+		t.Error("Unable to read history file")
+	}
 	//updatedData, _ := json.MarshalIndent(cmds, "", "\t")
 	//fmt.Println(string(updatedData))
 
-	for _, cmd := range ret {
+	for _, cmd := range cmds {
 		if cmd.CmdString == "sleep" {
 			t.Error("Command was not deleted as expected")
 		}
@@ -429,5 +499,4 @@ func TestOverwriteCmdHistoryFile(t *testing.T) {
 	t.Cleanup(func() {
 		os.Remove(testHistoryFile)
 	})
-
 }

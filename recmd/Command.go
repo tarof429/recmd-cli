@@ -36,7 +36,7 @@ type ScheduledCommand struct {
 // 	Salt string `json:"salt"`
 // }
 
-const historyFile = "cmd_history.json"
+const historyFile = ".cmd_history.json"
 
 //const configFile = ".recmd.json"
 
@@ -91,75 +91,93 @@ const historyFile = "cmd_history.json"
 // }
 
 // ReadCmdHistoryFile reads historyFile and generates a list of Command structs
-func ReadCmdHistoryFile(dir string) []Command {
+func ReadCmdHistoryFile(dir string) ([]Command, error) {
 
 	var cmds []Command
 
 	data, err := ioutil.ReadFile(dir + "/" + historyFile)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "An error occurred whiel reading historyfile: %v\n", err)
-		return cmds
+		fmt.Fprintf(os.Stderr, "An error occurred while reading historyfile: %v\n", err)
+		return cmds, err
 	}
 
 	if err := json.Unmarshal(data, &cmds); err != nil {
-		fmt.Fprintf(os.Stderr, "JSON unmarshalling failed: %s\n", err)
+		//fmt.Fprintf(os.Stderr, "JSON unmarshalling failed: %s\n", err)
+		return cmds, err
 	}
 
-	return cmds
+	return cmds, nil
 }
 
 // SelectCmd returns a command
-func SelectCmd(dir string, field string, value string) Command {
+func SelectCmd(dir string, field string, value string) (Command, error) {
 
-	cmds := ReadCmdHistoryFile(dir)
+	cmds, error := ReadCmdHistoryFile(dir)
+
+	if error != nil {
+		return Command{}, error
+	}
 
 	for _, cmd := range cmds {
 		switch field {
 		case "commandString":
 			if strings.Index(cmd.CmdString, value) == 0 {
-				return cmd
+				return cmd, nil
 			}
 		case "commandHash":
 			if strings.Index(cmd.CmdHash, value) == 0 {
-				return cmd
+				return cmd, nil
 			}
 		}
 	}
 
 	// Return an empty command if it could not be found
-	return Command{}
+	return Command{}, nil
 }
 
 // DeleteCmd deletes a command. It's best to pass in the commandHash
 // because commands may look similar.
-func DeleteCmd(cmds []Command, field string, value string) []Command {
+func DeleteCmd(dir string, value string, field string) int {
+
+	cmds, error := ReadCmdHistoryFile(dir)
+
+	if error != nil {
+		return -1
+	}
 
 	foundIndex := -1
 
 	for index, cmd := range cmds {
+		//fmt.Println(cmd)
+
 		switch field {
 		case "commandString":
+
 			if strings.Index(cmd.CmdString, value) == 0 {
 				foundIndex = index
 				break
 			}
 		case "commandHash":
+
 			if strings.Index(cmd.CmdHash, value) == 0 {
 				foundIndex = index
 				break
 			}
 		}
+
 	}
 
-	if foundIndex == -1 {
-		fmt.Fprintf(os.Stderr, "Unable to find command\n")
+	if foundIndex != -1 {
+		//fmt.Println("Found command. Found index was " + strconv.Itoa(foundIndex))
+		// We may want to do more investigation to know why this works...
+		cmds = append(cmds[:foundIndex], cmds[foundIndex+1:]...)
+
+		// Return whether we are able to overwrite the history file
+		OverwriteCmdHistoryFile(dir, cmds)
 	}
 
-	// We may want to do more investigation to know why this works...
-	cmds = append(cmds[:foundIndex], cmds[foundIndex+1:]...)
-
-	return cmds
+	return foundIndex
 }
 
 // OverwriteCmdHistoryFile overwrites the history file with []Command passed in as a parameter
@@ -172,6 +190,27 @@ func OverwriteCmdHistoryFile(dir string, cmds []Command) bool {
 	error := ioutil.WriteFile(dir+"/"+historyFile, updatedData, os.FileMode(mode))
 
 	return error == nil
+}
+
+// CreateCmdHistoryFile creates an empty history file
+func CreateCmdHistoryFile(dir string) bool {
+
+	// Check if the file does not exist. If not, then create it and add our first command to it.
+	f, err := os.Open(dir + "/" + historyFile)
+
+	// Immediately close the file since we plan to write to it
+	defer f.Close()
+
+	// Check if the file doesn't exist and if so, then write it.
+	if err != nil {
+
+		mode := int(0644)
+
+		error := ioutil.WriteFile(dir+"/"+historyFile, []byte(nil), os.FileMode(mode))
+
+		return error == nil
+	}
+	return true
 }
 
 // WriteCmdHistoryFile writes a command to the history file
