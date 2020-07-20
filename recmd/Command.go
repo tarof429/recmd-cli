@@ -292,7 +292,11 @@ func NewCommand(cmdString string, cmdComment string) Command {
 		return fmt.Sprintf("%.15x", h.Sum(nil))
 	}()
 
-	cmd := Command{formattedHash, cmdString, cmdComment, time.Now(), time.Now()}
+	cmd := Command{formattedHash,
+		strings.Trim(cmdString, ""),
+		strings.Trim(cmdComment, ""),
+		time.Now(),
+		time.Now()}
 
 	return cmd
 }

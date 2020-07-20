@@ -18,7 +18,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 	recmd "github.com/tarof429/recmd"
@@ -39,13 +38,37 @@ var listCmd = &cobra.Command{
 
 		readCmds, err := recmd.ReadCmdHistoryFile(homeDir)
 
-		// Mon Jan 2 15:04:05 MST 2006
-		layout := "2006-01-02"
+		// layout := "Mon 01 02 2006 15:04:05"
+
+		output := fmt.Sprintf("%.15s\t\t%-40s\t%-50s\n", "COMMAND HASH", "COMMAND STRING", "COMMAND COMMENT")
+		//fmt.Printf("%.15s\t\t%.30s\t%.30s\n", "COMMAND HASH", "COMMAND STRING", "COMMAND COMMENT")
 
 		for _, c := range readCmds {
-			creationTime, _ := time.Parse(layout, c.Creationtime.String())
-			fmt.Printf("%s\t%s\t%s\t%v\t%v\n", c.CmdHash, c.CmdString, c.Comment, creationTime, c.Modificationtime)
+			// Maybe these are nice to have
+			// creationTime := c.Creationtime.Format(layout)
+			// modTime := c.Creationtime.Format(layout)
+			cmdHash := c.CmdHash[0:15]
+
+			var cmdString string
+			var comment string
+
+			if len(c.CmdString) > 40 {
+				cmdString = c.CmdString[0:40] + "..."
+			} else {
+				cmdString = c.CmdString
+			}
+
+			if len(c.Comment) > 50 {
+				comment = c.Comment[0:50] + "..."
+			} else {
+				comment = c.Comment
+			}
+
+			output = fmt.Sprintf(output+"%.15s\t\t%-40s\t%-50s\n", cmdHash, cmdString, comment)
+			//fmt.Printf("%.15s\t\t%.30s\t\t%.30s\n", c.CmdHash, c.CmdString, c.Comment)
 		}
+
+		fmt.Print(output)
 	},
 }
 
