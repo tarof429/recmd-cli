@@ -24,19 +24,19 @@ import (
 	recmd "github.com/tarof429/recmd"
 )
 
-var commandField string
-
-// inspectCmd represents the show command
-var inspectCmd = &cobra.Command{
-	Use:   "inspect",
-	Short: "Inspect the command",
-	Long:  `Inspect the command`,
+// searchCmd represents the search command
+var searchCmd = &cobra.Command{
+	Use:   "search",
+	Short: "Search for a command",
+	Long:  `Search for a command`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Error: either the command or hash must be specified")
+			fmt.Println("Must specify the command")
 			os.Exit(1)
 		}
+
+		value := args[0]
 
 		homeDir, err := os.UserHomeDir()
 
@@ -44,42 +44,27 @@ var inspectCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
 		}
 
-		value := args[0]
+		ret, err := recmd.SelectCmd(homeDir, "commandString", value)
 
-		cmds, cerr := recmd.SelectCmd(homeDir, "commandHash", value)
-
-		if cerr != nil {
-			fmt.Fprintf(os.Stderr, "Unable to read history file: %s\n", err)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
 		}
 
-		if len(cmds) == 0 {
-			cmds, cerr = recmd.SelectCmd(homeDir, "commandString", value)
-		}
-
-		if len(cmds) == 0 {
-			return
-		}
-
-		// Print the command
-		data, _ := json.MarshalIndent(cmds, "", "\t")
+		data, _ := json.MarshalIndent(ret, "", "\t")
 		fmt.Println(string(data))
-
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(inspectCmd)
+	rootCmd.AddCommand(searchCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// inspectCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// searchCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-
-	//inspectCmd.Flags().StringVarP(&commandField, "field", "f", "", "Field for identifying the command (commandString/commandHash)")
-	//rootCmd.MarkFlagRequired("f")
-
+	// searchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

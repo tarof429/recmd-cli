@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	recmd "github.com/tarof429/recmd"
@@ -38,8 +39,12 @@ var listCmd = &cobra.Command{
 
 		readCmds, err := recmd.ReadCmdHistoryFile(homeDir)
 
+		// Mon Jan 2 15:04:05 MST 2006
+		layout := "2006-01-02"
+
 		for _, c := range readCmds {
-			fmt.Printf("%s\t%s\t%s%v\t%v\n", c.CmdHash, c.CmdString, c.Comment, c.Creationtime, c.Modificationtime)
+			creationTime, _ := time.Parse(layout, c.Creationtime.String())
+			fmt.Printf("%s\t%s\t%s\t%v\t%v\n", c.CmdHash, c.CmdString, c.Comment, creationTime, c.Modificationtime)
 		}
 	},
 }

@@ -323,7 +323,7 @@ func TestRunByCommandString(t *testing.T) {
 		t.Error("Unable to read history file")
 	}
 
-	sc := ScheduleCommand(ret, RunShellScriptCommand)
+	sc := ScheduleCommand(ret[0], RunShellScriptCommand)
 
 	if sc.ExitStatus != 0 {
 		t.Error("The exit status of the command was not 0")
@@ -365,7 +365,7 @@ func TestRunByCommandHash(t *testing.T) {
 	// data, _ := json.MarshalIndent(ret, "", "\t")
 	// fmt.Println(string(data))
 
-	if ret.CmdHash != "" {
+	if len(ret) > 0 {
 		t.Error("Accidentally did not find an empty command")
 	}
 
@@ -499,4 +499,26 @@ func TestOverwriteCmdHistoryFile(t *testing.T) {
 	t.Cleanup(func() {
 		os.Remove(testHistoryFile)
 	})
+}
+
+func TestSelectCmd(t *testing.T) {
+
+	cmd := NewCommand("uname", "Show my name")
+
+	result := WriteCmdHistoryFile(testdataDir, cmd)
+
+	if result != true {
+		t.Error("Unable to write history file")
+	}
+
+	// Attempt to select uname
+	ret, err := SelectCmd(testdataDir, "commandString", "uname")
+
+	if err != nil {
+		t.Error("Unable to read history file")
+	}
+
+	// Show the contents of the command. The fields should be empty.
+	data, _ := json.MarshalIndent(ret, "", "\t")
+	fmt.Println(string(data))
 }

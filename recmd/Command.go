@@ -111,29 +111,30 @@ func ReadCmdHistoryFile(dir string) ([]Command, error) {
 }
 
 // SelectCmd returns a command
-func SelectCmd(dir string, field string, value string) (Command, error) {
+func SelectCmd(dir string, field string, value string) ([]Command, error) {
 
 	cmds, error := ReadCmdHistoryFile(dir)
 
+	var ret []Command
+
 	if error != nil {
-		return Command{}, error
+		return ret, error
 	}
 
 	for _, cmd := range cmds {
 		switch field {
 		case "commandString":
 			if strings.Index(cmd.CmdString, value) == 0 {
-				return cmd, nil
+				ret = append(ret, cmd)
 			}
 		case "commandHash":
 			if strings.Index(cmd.CmdHash, value) == 0 {
-				return cmd, nil
+				ret = append(ret, cmd)
 			}
 		}
 	}
 
-	// Return an empty command if it could not be found
-	return Command{}, nil
+	return ret, nil
 }
 
 // DeleteCmd deletes a command. It's best to pass in the commandHash
