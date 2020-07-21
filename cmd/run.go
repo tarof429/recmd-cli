@@ -51,7 +51,7 @@ var runCmd = &cobra.Command{
 			return
 		}
 
-		sc := recmd.ScheduleCommand(selectedCmd, recmd.RunShellScriptCommand)
+		sc := recmd.ScheduleCommand(selectedCmd, recmd.RunShellScriptCommandWithSpinner)
 
 		if sc.ExitStatus != 0 {
 			fmt.Println(sc.Stderr)

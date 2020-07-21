@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/theckman/yacspin"
 )
 
 // Command represents a command and optionally a comment to document what the command does
@@ -394,4 +396,25 @@ func RunShellScriptCommand(sc *ScheduledCommand, c chan int) {
 	}
 
 	c <- sc.ExitStatus
+}
+
+// RunShellScriptCommandWithSpinner runs a command with a spinner
+func RunShellScriptCommandWithSpinner(sc *ScheduledCommand, c chan int) {
+
+	cfg := yacspin.Config{
+		Frequency:       100 * time.Millisecond,
+		CharSet:         yacspin.CharSets[14],
+		Suffix:          " Scheduling commmand ",
+		SuffixAutoColon: true,
+		StopCharacter:   "✓",
+		StopColors:      []string{"fgGreen"},
+	}
+
+	spinner, _ := yacspin.New(cfg)
+
+	spinner.Start()
+
+	RunShellScriptCommand(sc, c)
+
+	spinner.Stop()
 }
