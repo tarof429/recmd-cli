@@ -325,7 +325,9 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	// Set end time after we receive from the channel
 	sc.EndTime = time.Now()
 
-	log.Printf("Command status for %s: %d\n", sc.CmdHash, status)
+	if status != 0 {
+		log.Printf("Command status for %s: %d\n", sc.CmdHash, status)
+	}
 
 	return sc
 }
