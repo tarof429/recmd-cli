@@ -43,15 +43,10 @@ var deleteCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
 		}
 
-		foundIndex := recmd.DeleteCmd(homeDir, value, "commandHash")
+		foundIndex := recmd.DeleteCmd(homeDir, value)
 
 		if foundIndex == -1 {
-			// Deletion by hash failed. Let's try the commandString instead
-			foundIndex = recmd.DeleteCmd(homeDir, value, "commandString")
-
-			if foundIndex == -1 {
-				fmt.Fprintf(os.Stderr, "Unable to find command in history\n")
-			}
+			fmt.Fprintf(os.Stderr, "Unable to find command in history\n")
 		}
 	},
 }

@@ -46,22 +46,19 @@ var inspectCmd = &cobra.Command{
 
 		value := args[0]
 
-		cmds, cerr := recmd.SelectCmd(homeDir, "commandHash", value)
+		selectedCmd, cerr := recmd.SelectCmd(homeDir, value)
 
 		if cerr != nil {
 			fmt.Fprintf(os.Stderr, "Unable to read history file: %s\n", err)
 		}
 
-		if len(cmds) == 0 {
-			cmds, cerr = recmd.SelectCmd(homeDir, "commandString", value)
-		}
-
-		if len(cmds) == 0 {
+		if selectedCmd.CmdHash == "" {
+			fmt.Fprintf(os.Stderr, "Unable to find command\n")
 			return
 		}
 
 		// Print the command
-		data, _ := json.MarshalIndent(cmds, "", "\t")
+		data, _ := json.MarshalIndent(selectedCmd, "", "\t")
 		fmt.Println(string(data))
 
 	},

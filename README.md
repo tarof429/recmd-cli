@@ -1,5 +1,9 @@
 # Command runner for Go
 
+## Introduction
+
+recmd is a small tool for running commands stored in a JSON file. You can search tools by hash or part of the command string. Output will also be in JSON format. This tool was inspired by the *docker* command but is more general purpose. Commands are run *in place* and do not involve agents or process monitoring. As such, this tool is best suited for commands that have short execution times.
+
 ## Quick start
 
 ```bash

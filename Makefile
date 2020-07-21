@@ -8,7 +8,7 @@ test:
 	(cd recmd; go test)
 
 clean:
-	rm -f recmd
+	rm -f recmd-cli
 
 install:
 	go install

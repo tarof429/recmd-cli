@@ -14,11 +14,10 @@ import (
 
 // Command represents a command and optionally a comment to document what the command does
 type Command struct {
-	CmdHash          string    `json:"commandHash"`
-	CmdString        string    `json:"commandString"`
-	Comment          string    `json:"comment"`
-	Creationtime     time.Time `json:"creationTime"`
-	Modificationtime time.Time `json:"lastExecutionTime"`
+	CmdHash   string        `json:"commandHash"`
+	CmdString string        `json:"commandString"`
+	Comment   string        `json:"comment"`
+	Duration  time.Duration `json:"duration"`
 }
 
 // ScheduledCommand represents a command that is scheduled to run
@@ -31,64 +30,7 @@ type ScheduledCommand struct {
 	EndTime    time.Time `json:"endTime"`
 }
 
-// // Config represents global configuration
-// type Config struct {
-// 	Salt string `json:"salt"`
-// }
-
 const historyFile = ".cmd_history.json"
-
-//const configFile = ".recmd.json"
-
-// LoadConfigFile reads configFile and initializes recmd.
-// func LoadConfigFile(prefix string) Config {
-// 	var config Config
-
-// 	data, err := ioutil.ReadFile(prefix + "/" + configFile)
-
-// 	// An error occured while reading historyFile.
-// 	if err != nil {
-// 		fmt.Fprintf(os.Stderr, "%v\n", err)
-// 		return config
-// 	}
-
-// 	if err := json.Unmarshal(data, &config); err != nil {
-// 		log.Fatalf("JSON unmarshalling failed: %s\n", err)
-// 	}
-
-// 	return config
-// }
-
-// GenerateConfig generates a config file
-// func GenerateConfig(prefix string) Config {
-
-// 	// Generate a new hash
-// 	h := sha1.New()
-
-// 	// Set the string we want to hash
-// 	rand.Seed(time.Now().UTC().UnixNano())
-// 	rand := rand.Int()
-// 	io.WriteString(h, strconv.Itoa(rand))
-
-// 	// Create Config with our hash
-// 	var config = Config{hex.EncodeToString(h.Sum(nil))}
-
-// 	return config
-// }
-
-// WriteConfig writes Config to a fiel
-// func WriteConfig(path string, config Config) {
-// 	// Convert the struct to JSON
-// 	data, err := json.MarshalIndent(config, "", "\t")
-
-// 	if err != nil {
-// 		fmt.Printf("%s\n", err)
-// 	}
-
-// 	mode := int(0644)
-
-// 	ioutil.WriteFile(path+"/"+configFile, data, os.FileMode(mode))
-// }
 
 // ReadCmdHistoryFile reads historyFile and generates a list of Command structs
 func ReadCmdHistoryFile(dir string) ([]Command, error) {
@@ -103,7 +45,6 @@ func ReadCmdHistoryFile(dir string) ([]Command, error) {
 	}
 
 	if err := json.Unmarshal(data, &cmds); err != nil {
-		//fmt.Fprintf(os.Stderr, "JSON unmarshalling failed: %s\n", err)
 		return cmds, err
 	}
 
@@ -111,35 +52,27 @@ func ReadCmdHistoryFile(dir string) ([]Command, error) {
 }
 
 // SelectCmd returns a command
-func SelectCmd(dir string, field string, value string) ([]Command, error) {
+func SelectCmd(dir string, value string) (Command, error) {
 
 	cmds, error := ReadCmdHistoryFile(dir)
 
-	var ret []Command
-
 	if error != nil {
-		return ret, error
+		return Command{}, error
 	}
 
 	for _, cmd := range cmds {
-		switch field {
-		case "commandString":
-			if strings.Index(cmd.CmdString, value) == 0 {
-				ret = append(ret, cmd)
-			}
-		case "commandHash":
-			if strings.Index(cmd.CmdHash, value) == 0 {
-				ret = append(ret, cmd)
-			}
+
+		if strings.Index(cmd.CmdHash, value) == 0 {
+			return cmd, nil
 		}
 	}
 
-	return ret, nil
+	return Command{}, nil
 }
 
 // DeleteCmd deletes a command. It's best to pass in the commandHash
 // because commands may look similar.
-func DeleteCmd(dir string, value string, field string) int {
+func DeleteCmd(dir string, value string) int {
 
 	cmds, error := ReadCmdHistoryFile(dir)
 
@@ -150,23 +83,10 @@ func DeleteCmd(dir string, value string, field string) int {
 	foundIndex := -1
 
 	for index, cmd := range cmds {
-		//fmt.Println(cmd)
-
-		switch field {
-		case "commandString":
-
-			if strings.Index(cmd.CmdString, value) == 0 {
-				foundIndex = index
-				break
-			}
-		case "commandHash":
-
-			if strings.Index(cmd.CmdHash, value) == 0 {
-				foundIndex = index
-				break
-			}
+		if strings.Index(cmd.CmdHash, value) == 0 {
+			foundIndex = index
+			break
 		}
-
 	}
 
 	if foundIndex != -1 {
@@ -214,6 +134,91 @@ func CreateCmdHistoryFile(dir string) bool {
 	return true
 }
 
+// UpdateCommandDuration updates a command with the same hash in the history file
+func UpdateCommandDuration(dir string, cmd Command, duration time.Duration) bool {
+
+	// Check if the file does not exist. If not, then create it and add our first command to it.
+	f, err := os.Open(dir + "/" + historyFile)
+
+	// Immediately close the file since we plan to write to it
+	f.Close()
+
+	// Check if the file doesn't exist and if so, then write it.
+	if err != nil {
+
+		// The array of commands
+		var cmds []Command
+
+		// Set the duration
+		cmd.Duration = duration
+
+		cmds = append(cmds, cmd)
+
+		mode := int(0644)
+
+		updatedData, _ := json.MarshalIndent(cmds, "", "\t")
+
+		error := ioutil.WriteFile(dir+"/"+historyFile, updatedData, os.FileMode(mode))
+
+		return error == nil
+	}
+
+	// Update the command in the history file
+
+	// The array of commands
+	var cmds []Command
+
+	// Read history file
+	data, err := ioutil.ReadFile(dir + "/" + historyFile)
+
+	// An error occured while reading historyFile.
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return false
+	}
+
+	if err := json.Unmarshal(data, &cmds); err != nil {
+		fmt.Fprintf(os.Stderr, "JSON unmarshalling failed: %s\n", err)
+		return false
+	}
+
+	//fmt.Println("Updating duration")
+
+	var found bool
+	var foundIndex int
+
+	// Update the duration for the command
+	for index, c := range cmds {
+		if c.CmdHash == cmd.CmdHash {
+			//fmt.Println("Found command")
+			foundIndex = index
+			found = true
+			//c.Duration = cmd.Duration
+			//fmt.Fprintf(os.Stderr, "Command hash already exists: %s\n", cmd.CmdString)
+			break
+			//return false
+		}
+	}
+
+	if found == true {
+		cmds[foundIndex].Duration = duration
+		//fmt.Println(cmds[foundIndex])
+	}
+
+	// Convert the struct to JSON
+	updatedData, updatedDataErr := json.MarshalIndent(cmds, "", "\t")
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", updatedDataErr)
+	}
+
+	mode := int(0644)
+
+	error := ioutil.WriteFile(dir+"/"+historyFile, updatedData, os.FileMode(mode))
+
+	return error == nil
+}
+
 // WriteCmdHistoryFile writes a command to the history file
 func WriteCmdHistoryFile(dir string, cmd Command) bool {
 
@@ -239,7 +244,7 @@ func WriteCmdHistoryFile(dir string, cmd Command) bool {
 		return error == nil
 	}
 
-	// Add the command to the history file
+	// Update the command in the history file
 
 	// The array of commands
 	var cmds []Command
@@ -258,10 +263,12 @@ func WriteCmdHistoryFile(dir string, cmd Command) bool {
 		return false
 	}
 
-	// Loop through cmds to check whether the command already exists.
+	// Check if the command hash alaready exists, and prevent the user from adding the same command
 	for _, c := range cmds {
 		if c.CmdHash == cmd.CmdHash {
+			// c.Duration = cmd.Duration
 			fmt.Fprintf(os.Stderr, "Command hash already exists: %s\n", cmd.CmdString)
+			//break
 			return false
 		}
 	}
@@ -295,8 +302,7 @@ func NewCommand(cmdString string, cmdComment string) Command {
 	cmd := Command{formattedHash,
 		strings.Trim(cmdString, ""),
 		strings.Trim(cmdComment, ""),
-		time.Now(),
-		time.Now()}
+		-1}
 
 	return cmd
 }
@@ -310,11 +316,13 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	sc.CmdHash = cmd.CmdHash
 	sc.CmdString = cmd.CmdString
 	sc.Comment = cmd.Comment
-	sc.StartTime = time.Now()
-	sc.Modificationtime = time.Now()
+	sc.Duration = -1
 
 	// Create a channel to hold exit status
 	c := make(chan int)
+
+	// Set the start time
+	sc.StartTime = time.Now()
 
 	// Run the command in a goroutine
 	go f(&sc, c)
@@ -322,8 +330,15 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	// Receive the exit status of the command
 	status := <-c
 
+	now := time.Now()
+
 	// Set end time after we receive from the channel
-	sc.EndTime = time.Now()
+	sc.EndTime = now
+
+	// Calculate the duration and store it
+	sc.Duration = now.Sub(sc.StartTime)
+
+	//fmt.Printf("Duration: %f\n", sc.Duration.Seconds())
 
 	if status != 0 {
 		log.Printf("Command status for %s: %d\n", sc.CmdHash, status)

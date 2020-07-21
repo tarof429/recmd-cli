@@ -44,7 +44,7 @@ var searchCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
 		}
 
-		ret, err := recmd.SelectCmd(homeDir, "commandString", value)
+		ret, err := recmd.SelectCmd(homeDir, value)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)

@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	recmd "github.com/tarof429/recmd"
@@ -40,13 +41,13 @@ var listCmd = &cobra.Command{
 
 		// layout := "Mon 01 02 2006 15:04:05"
 
-		output := fmt.Sprintf("%.15s\t\t%-40s\t%-50s\n", "COMMAND HASH", "COMMAND STRING", "COMMAND COMMENT")
-		//fmt.Printf("%.15s\t\t%.30s\t%.30s\n", "COMMAND HASH", "COMMAND STRING", "COMMAND COMMENT")
+		output := fmt.Sprintf("%.15s\t\t%-40s\t%-50s\t%.30s\n", "COMMAND HASH", "COMMAND STRING", "COMMENT", "DURATION")
 
 		for _, c := range readCmds {
 			// Maybe these are nice to have
 			// creationTime := c.Creationtime.Format(layout)
 			// modTime := c.Creationtime.Format(layout)
+
 			cmdHash := c.CmdHash[0:15]
 
 			var cmdString string
@@ -64,8 +65,24 @@ var listCmd = &cobra.Command{
 				comment = c.Comment
 			}
 
-			output = fmt.Sprintf(output+"%.15s\t\t%-40s\t%-50s\n", cmdHash, cmdString, comment)
-			//fmt.Printf("%.15s\t\t%.30s\t\t%.30s\n", c.CmdHash, c.CmdString, c.Comment)
+			var durationString string
+
+			if int(c.Duration.Minutes()) > 0 {
+				minutes := strconv.FormatFloat(c.Duration.Minutes(), 'f', 0, 64)
+				seconds := strconv.FormatFloat(c.Duration.Seconds(), 'f', 0, 64)
+				durationString = minutes + " minute(s) " + seconds + " second(s)"
+			} else {
+
+				seconds := strconv.FormatFloat(c.Duration.Seconds(), 'f', 0, 64)
+				if seconds == "-0" {
+					durationString = "-"
+				} else {
+					durationString = seconds + " second(s)"
+				}
+
+			}
+
+			output = fmt.Sprintf(output+"%.15s\t\t%-40s\t%-50s\t%s\n", cmdHash, cmdString, comment, durationString)
 		}
 
 		fmt.Print(output)
