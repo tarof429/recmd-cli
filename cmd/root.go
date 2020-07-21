@@ -32,11 +32,9 @@ var rootCmd = &cobra.Command{
 	Use:   "recmd-cli",
 	Short: "A command runner for Go",
 	Long: `
-recmd-cli is a command runner which manages commands. You can store
-commands in-line or execute scripts. Do you need to Google every time you 
-want cleanup your package cache or put your computer in suspend mode? 
-Use recmd-cli to store the command and its description and you won't have
-to rely on Google all the time.`,
+	recmd-cli is a command runner which manages commands. You can store
+	commands in-line or execute scripts. It supports simple CRUD operations. 
+	Commands can be modified by editing the JSON configuration file.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

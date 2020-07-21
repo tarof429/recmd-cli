@@ -9,3 +9,6 @@ test:
 
 clean:
 	rm -f recmd
+
+install:
+	go install
