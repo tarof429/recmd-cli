@@ -23,19 +23,20 @@ import (
 	recmd "github.com/tarof429/recmd"
 )
 
+var command string
+var message string
+
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a command",
-	Long:  `Add a command,`,
+	Long:  `Add a command`,
+
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 2 {
-			fmt.Println("Must specify the command and comment")
+		if command == "" || message == "" {
+			fmt.Println("Usage: recmd-cli add -c <command> -i <comment>")
 			os.Exit(1)
 		}
-
-		value := args[0]
-		comment := args[1]
 
 		homeDir, err := os.UserHomeDir()
 
@@ -43,18 +44,22 @@ var addCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
 		}
 
-		testCmd := recmd.NewCommand(value, comment)
+		testCmd := recmd.NewCommand(command, message)
 
 		ret := recmd.WriteCmdHistoryFile(homeDir, testCmd)
 
 		if ret == false {
-			fmt.Fprintf(os.Stderr, "An error occurred whiel writing the history file %v\n", ret)
+			fmt.Fprintf(os.Stderr, "An error occurred while writing the history file\n")
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
+
+	addCmd.Flags().StringVarP(&command, "command", "c", "", "Command line")
+	addCmd.Flags().StringVarP(&message, "comment", "i", "", "Comment")
+	// addCmd.AddCommand(&comment, "message", "m", 1, "Message about the command")
 
 	// Here you will define your flags and configuration settings.
 

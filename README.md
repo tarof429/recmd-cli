@@ -6,6 +6,8 @@ recmd is a small tool for running commands. The tool user interface was inspired
 
 ## Quick start
 
+Invoking recmd-cli will display the available commands.
+
 ```bash
 $ ./recmd-cli 
 
@@ -34,6 +36,13 @@ Flags:
 Use "recmd-cli [command] --help" for more information about a command.
 ```
 
+The command to add requires two flags.
+
+```bash
+$ ./recmd-cli add
+Usage: recmd-cli add -c <command> -i <comment>
+```
+
 ## Configuration
 
 recmd-cli stores commands in $HOME/.cmd_history.json. 
@@ -57,7 +66,7 @@ $ ./recmd-cli run d8e7c90b269a1ca
 ⠋ Scheduling commmand hello!
 
 ✓ Scheduling commmand 
-$ ./recmd-cli add "sudo ss -tulpn | grep :80" "Find what process is listening to port 80"
+$ ./recmd-cli add -c "sudo ss -tulpn | grep :80" -i "Find what process is listening to port 80"
 $ ./recmd-cli list|grep 80
 6e2d304e213958e         sudo ss -tulpn | grep :80                       Find what process is listening to port 80               -
 $ ./recmd-cli run 6e2d304e213958e
