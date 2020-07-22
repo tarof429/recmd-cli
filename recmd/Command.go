@@ -377,7 +377,17 @@ func RunShellScriptCommand(sc *ScheduledCommand, c chan int) {
 		fmt.Fprintf(os.Stdout, "Errror while writing file: : %s\n", err)
 	}
 
-	out, err := exec.Command("sh", tempFile.Name()).Output()
+	cmd := exec.Command("sh", tempFile.Name())
+
+	// We may want to make this configurable in the future.
+	// For now, all commands will be run from the user's home directory
+	cmd.Dir, err = os.UserHomeDir()
+
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Errror while assigning working directory: : %s\n", err)
+	}
+
+	out, err := cmd.Output()
 
 	if err == nil {
 		sc.ExitStatus = 0
