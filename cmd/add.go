@@ -34,7 +34,7 @@ var addCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if command == "" || message == "" {
-			fmt.Println("Usage: recmd-cli add -c <command> -i <comment>")
+			cmd.Usage()
 			os.Exit(1)
 		}
 
