@@ -24,8 +24,7 @@ type Command struct {
 // ScheduledCommand represents a command that is scheduled to run
 type ScheduledCommand struct {
 	Command
-	Stdout     string    `json:"stdout"`
-	Stderr     string    `json:"stderr"`
+	Coutput    string    `json:"coutput"`
 	ExitStatus int       `json:"exitStatus"`
 	StartTime  time.Time `json:"startTime"`
 	EndTime    time.Time `json:"endTime"`
@@ -351,8 +350,7 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 func RunMockCommand(sc *ScheduledCommand, c chan int) {
 	time.Sleep(1 * time.Second)
 	sc.ExitStatus = 99
-	sc.Stdout = "Mock stdout message"
-	sc.Stderr = "Mock stderr message"
+	sc.Coutput = "Mock stdout message"
 	c <- sc.ExitStatus
 }
 
@@ -393,23 +391,7 @@ func RunShellScriptCommand(sc *ScheduledCommand, c chan int) {
 		sc.ExitStatus = -1
 	}
 
-	sc.Stdout = string(combinedOutput)
-
-	// if err != nil {
-	// 	sc.ExitStatus = -1
-
-	// 	if err.Error() != "" {
-	// 		sc.Stderr = err.Error()
-	// 	}
-	// } else {
-	// 	sc.ExitStatus = 0
-	// }
-
-	// if out == nil {
-	// 	sc.Stdout = ""
-	// } else {
-	// 	sc.Stdout = string(out)
-	// }
+	sc.Coutput = string(combinedOutput)
 
 	c <- sc.ExitStatus
 }

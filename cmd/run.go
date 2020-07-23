@@ -58,8 +58,8 @@ var runCmd = &cobra.Command{
 
 		sc := recmd.ScheduleCommand(selectedCmd, recmd.RunShellScriptCommandWithSpinner)
 
-		if len(sc.Stdout) != 0 {
-			fmt.Println(sc.Stdout)
+		if len(sc.Coutput) != 0 {
+			fmt.Println(sc.Coutput)
 		}
 
 		defer os.Exit(sc.ExitStatus)
