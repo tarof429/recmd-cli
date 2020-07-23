@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -340,10 +339,9 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 	// Calculate the duration and store it
 	sc.Duration = now.Sub(sc.StartTime)
 
-	//fmt.Printf("Duration: %f\n", sc.Duration.Seconds())
-
+	// The main reason why this code exists is to use the value received from the channel.
 	if status != 0 {
-		log.Printf("Command status for %s: %d\n", sc.CmdHash, status)
+		fmt.Fprintf(os.Stderr, "\nError: command failed.\n")
 	}
 
 	return sc
@@ -364,17 +362,15 @@ func RunShellScriptCommand(sc *ScheduledCommand, c chan int) {
 	tempFile, err := ioutil.TempFile(os.TempDir(), "recmd-")
 
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "Command status: %d\n", err)
+		fmt.Fprintf(os.Stderr, "Error: unable to create temp file: %d\n", err)
 	}
 
 	defer os.Remove(tempFile.Name())
 
-	//fmt.Fprintf(os.Stdout, "Created "+tempFile.Name()+"\n")
-
 	_, err = tempFile.WriteString("#!/bin/sh\n\n" + sc.CmdString)
 
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "Errror while writing file: : %s\n", err)
+		fmt.Fprintf(os.Stderr, "Errror: unable to write script to temp file: : %s\n", err)
 	}
 
 	cmd := exec.Command("sh", tempFile.Name())
@@ -384,26 +380,36 @@ func RunShellScriptCommand(sc *ScheduledCommand, c chan int) {
 	cmd.Dir, err = os.UserHomeDir()
 
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "Errror while assigning working directory: : %s\n", err)
+		fmt.Fprintf(os.Stderr, "Error: Unable to obtain home directory: %s\n", err)
 	}
 
-	out, err := cmd.Output()
+	//out, err := cmd.Output()
 
-	if err == nil {
-		sc.ExitStatus = 0
-	} else {
+	combinedOutput, combinedOutputErr := cmd.CombinedOutput()
+
+	// fmt.Fprintf(os.Stdout, "\nError: %s error 2: %v\n", string(combinedOutput), err2)
+
+	if combinedOutputErr != nil {
 		sc.ExitStatus = -1
-
-		if err.Error() != "" {
-			sc.Stderr = err.Error()
-		}
 	}
 
-	if out == nil {
-		sc.Stdout = ""
-	} else {
-		sc.Stdout = string(out)
-	}
+	sc.Stdout = string(combinedOutput)
+
+	// if err != nil {
+	// 	sc.ExitStatus = -1
+
+	// 	if err.Error() != "" {
+	// 		sc.Stderr = err.Error()
+	// 	}
+	// } else {
+	// 	sc.ExitStatus = 0
+	// }
+
+	// if out == nil {
+	// 	sc.Stdout = ""
+	// } else {
+	// 	sc.Stdout = string(out)
+	// }
 
 	c <- sc.ExitStatus
 }

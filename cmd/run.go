@@ -38,7 +38,7 @@ var runCmd = &cobra.Command{
 		homeDir, err := os.UserHomeDir()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error, unable to obtain home directory path %v\n", err)
 			return
 		}
 
@@ -47,23 +47,28 @@ var runCmd = &cobra.Command{
 		selectedCmd, cerr := recmd.SelectCmd(homeDir, value)
 
 		if cerr != nil {
-			fmt.Fprintf(os.Stderr, "Unable to read history file: %s\n", err)
+			fmt.Fprintf(os.Stderr, "Error: unable to read history file: %s\n", err)
 			return
+		}
+
+		if selectedCmd.CmdHash == "" {
+			fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
+			os.Exit(1)
 		}
 
 		sc := recmd.ScheduleCommand(selectedCmd, recmd.RunShellScriptCommandWithSpinner)
 
-		if sc.ExitStatus != 0 {
-			fmt.Println(sc.Stderr)
-		} else {
+		if len(sc.Stdout) != 0 {
 			fmt.Println(sc.Stdout)
 		}
+
+		defer os.Exit(sc.ExitStatus)
 
 		ret := recmd.UpdateCommandDuration(homeDir, selectedCmd, sc.Duration)
 
 		if ret != true {
 			fmt.Fprintf(os.Stderr, "Error while updating command")
-			return
+			os.Exit(1)
 		}
 	},
 }
