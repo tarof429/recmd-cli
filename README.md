@@ -74,4 +74,26 @@ $ ./recmd-cli run 6e2d304e213958e
 tcp   LISTEN 0      511          0.0.0.0:80        0.0.0.0:*    users:(("nginx",pid=543724,fd=4),("nginx",pid=543723,fd=4))
 
 ✓ Scheduling commmand 
+```
 
+## Gotchas!
+
+If your command uses backticks, use single-quotes around the command instead of double-quotes to prevent the tool from storing the result of the command. For example:
+
+With double quotes:
+
+```bash
+$ ./recmd-cli add  -c "(echo `ls -al ~/. | wc -l` - 2) | bc" -i "Count of dot files in home directory"
+[taro@zaxman recmd-cli]$ ./recmd-cli list
+COMMAND HASH            COMMAND STRING                                  COMMENT                                                 DURATION
+e75710f201f513f         (echo 155 - 2) | bc                             Count of dot files in home directory                    -
+```
+
+With single quotes:
+
+```bash
+$ ./recmd-cli add  -c '(echo `ls -al ~/. | wc -l` - 2) | bc' -i "Count of dot files in home directory"
+[taro@zaxman recmd-cli]$ ./recmd-cli list
+COMMAND HASH            COMMAND STRING                                  COMMENT                                                 DURATION
+2f35231f613da42         (echo `ls -al ~/. | wc -l` - 2) | bc            Count of dot files in home directory                    -
+```
