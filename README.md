@@ -76,6 +76,23 @@ tcp   LISTEN 0      511          0.0.0.0:80        0.0.0.0:*    users:(("nginx",
 ✓ Scheduling commmand 
 ```
 
+It is possible to add commands that read from environment variables. For example, we could add a command that takes a port variable.
+
+```bash
+$ ./recmd-cli add -c 'sudo ss -tulpn | grep :$port' -p "port=$port" -i "Find what process is listenning to port"
+```
+
+Then to use this function, we would set the port variable just as we are invoking recmd-cli.
+
+```bash
+$ ./recmd-cli list |grep \$port
+6d83258f3296b50         sudo ss -tulpn | grep :$port                    Find what process is listenning to port                 0 second(s)
+
+$ export port=8080;./recmd-cli run 6d83258f3296b50;unset port
+✓ Scheduling commmand 
+tcp   LISTEN 0      4096               *:8080             *:*    users:(("hello",pid=160507,fd=3))  
+```
+
 ## Gotchas!
 
 If your command uses backticks, use single-quotes around the command instead of double-quotes to prevent the tool from storing the result of the command. For example:
