@@ -35,20 +35,29 @@ const historyFile = ".cmd_history.json"
 // ReadCmdHistoryFile reads historyFile and generates a list of Command structs
 func ReadCmdHistoryFile(dir string) ([]Command, error) {
 
-	var cmds []Command
+	var (
+		historyData []byte    // Data representing our history file
+		cmds        []Command // List of commands produced after unmarshalling historyData
+		err         error     // Any errors we might encounter
+	)
 
-	data, err := ioutil.ReadFile(dir + "/" + historyFile)
+	// Read the history file into historyData
+	historyData, err = ioutil.ReadFile(dir + "/" + historyFile)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "An error occurred while reading historyfile: %v\n", err)
 		return cmds, err
 	}
 
-	if err := json.Unmarshal(data, &cmds); err != nil {
-		return cmds, err
+	// Unmarshall historyData into a list of commands
+	err = json.Unmarshal(historyData, &cmds)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while unmarshalling: %v\n", err)
 	}
 
-	return cmds, nil
+	return cmds, err
+
 }
 
 // SelectCmd returns a command
