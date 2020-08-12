@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	recmd "github.com/tarof429/recmd"
@@ -39,15 +40,17 @@ var listCmd = &cobra.Command{
 
 		readCmds, err := recmd.ReadCmdHistoryFile(homeDir)
 
-		// layout := "Mon 01 02 2006 15:04:05"
+		w := tabwriter.NewWriter(os.Stdout, 2, 2, 4, ' ', 0)
 
-		output := fmt.Sprintf("%.15s\t\t%-40s\t%-50s\t%.30s\n", "COMMAND HASH", "COMMAND STRING", "COMMENT", "DURATION")
+		defer w.Flush()
+
+		show := func(a, b, c, d interface{}) {
+			fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", a, b, c, d)
+		}
+
+		show("COMMAND HASH", "COMMAND STRING", "COMMENT", "DURATION")
 
 		for _, c := range readCmds {
-			// Maybe these are nice to have
-			// creationTime := c.Creationtime.Format(layout)
-			// modTime := c.Creationtime.Format(layout)
-
 			cmdHash := c.CmdHash[0:15]
 
 			var cmdString string
@@ -82,10 +85,10 @@ var listCmd = &cobra.Command{
 
 			}
 
-			output = fmt.Sprintf(output+"%.15s\t\t%-40s\t%-50s\t%s\n", cmdHash, cmdString, comment, durationString)
+			show(cmdHash, cmdString, comment, durationString)
+
 		}
 
-		fmt.Print(output)
 	},
 }
 
