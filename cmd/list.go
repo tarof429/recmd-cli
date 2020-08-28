@@ -22,7 +22,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd"
+	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 // listCmd represents the list command

@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd"
+	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 // selectCmd represents the select command
