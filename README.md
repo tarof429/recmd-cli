@@ -45,7 +45,7 @@ Usage: recmd-cli add -c <command> -i <comment>
 
 ## Configuration
 
-recmd-cli stores commands in $HOME/.cmd_history.json. 
+recmd-cli stores commands in $HOME/.cmd_history.json. Use recmd-cli init to create it.
 
 ## Usage 
 
