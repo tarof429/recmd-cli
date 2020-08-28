@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -49,8 +48,7 @@ var searchCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
 		}
 
-		data, _ := json.MarshalIndent(ret, "", "\t")
-		fmt.Println(string(data))
+		display(ret)
 	},
 }
 
