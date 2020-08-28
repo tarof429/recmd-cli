@@ -79,6 +79,30 @@ func SelectCmd(dir string, value string) (Command, error) {
 	return Command{}, nil
 }
 
+// SearchCmd returns a command by name
+func SearchCmd(dir string, value string) ([]Command, error) {
+
+	cmds, error := ReadCmdHistoryFile(dir)
+
+	ret := []Command{}
+
+	if error != nil {
+		return []Command{}, error
+	}
+
+	for _, cmd := range cmds {
+
+		// Use lower case for evaluation
+		comment := strings.ToLower(cmd.Comment)
+
+		if strings.Contains(comment, value) {
+			ret = append(ret, cmd)
+		}
+	}
+
+	return ret, nil
+}
+
 // DeleteCmd deletes a command. It's best to pass in the commandHash
 // because commands may look similar.
 func DeleteCmd(dir string, value string) int {

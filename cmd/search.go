@@ -24,13 +24,12 @@ import (
 	recmd "github.com/tarof429/recmd"
 )
 
-// selectCmd represents the select command
-var selectCmd = &cobra.Command{
-	Use:   "select",
-	Short: "Select a command by is hash",
-	Long:  `Select a command by its hash`,
+// searchCmd represents the search command
+var searchCmd = &cobra.Command{
+	Use:   "search",
+	Short: "Search for a command by its comment",
+	Long:  `Search for a command by its comment`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		if len(args) != 1 {
 			fmt.Println("Must specify the command")
 			os.Exit(1)
@@ -44,7 +43,7 @@ var selectCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
 		}
 
-		ret, err := recmd.SelectCmd(homeDir, value)
+		ret, err := recmd.SearchCmd(homeDir, value)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
@@ -56,7 +55,7 @@ var selectCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(selectCmd)
+	rootCmd.AddCommand(searchCmd)
 
 	// Here you will define your flags and configuration settings.
 
