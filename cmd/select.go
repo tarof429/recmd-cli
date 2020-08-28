@@ -24,11 +24,11 @@ import (
 	recmd "github.com/tarof429/recmd"
 )
 
-// searchCmd represents the search command
-var searchCmd = &cobra.Command{
-	Use:   "search",
-	Short: "Search for a command",
-	Long:  `Search for a command`,
+// selectCmd represents the select command
+var selectCmd = &cobra.Command{
+	Use:   "select",
+	Short: "Select for a command",
+	Long:  `Select for a command`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
@@ -56,7 +56,7 @@ var searchCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(searchCmd)
+	rootCmd.AddCommand(selectCmd)
 
 	// Here you will define your flags and configuration settings.
 
