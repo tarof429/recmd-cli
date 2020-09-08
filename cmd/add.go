@@ -58,7 +58,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	addCmd.Flags().StringVarP(&command, "command", "c", "", "Command line")
-	addCmd.Flags().StringVarP(&message, "comment", "i", "", "Comment")
+	addCmd.Flags().StringVarP(&message, "description", "d", "", "Description")
 	// addCmd.AddCommand(&comment, "message", "m", 1, "Message about the command")
 
 	// Here you will define your flags and configuration settings.

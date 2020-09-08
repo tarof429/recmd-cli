@@ -13,12 +13,12 @@ import (
 	"github.com/theckman/yacspin"
 )
 
-// Command represents a command and optionally a comment to document what the command does
+// Command represents a command and optionally a description to document what the command does
 type Command struct {
-	CmdHash   string        `json:"commandHash"`
-	CmdString string        `json:"commandString"`
-	Comment   string        `json:"comment"`
-	Duration  time.Duration `json:"duration"`
+	CmdHash     string        `json:"commandHash"`
+	CmdString   string        `json:"commandString"`
+	Description string        `json:"description"`
+	Duration    time.Duration `json:"duration"`
 }
 
 // ScheduledCommand represents a command that is scheduled to run
@@ -93,7 +93,7 @@ func SearchCmd(dir string, value string) ([]Command, error) {
 	for _, cmd := range cmds {
 
 		// Use lower case for evaluation
-		comment := strings.ToLower(cmd.Comment)
+		comment := strings.ToLower(cmd.Description)
 
 		if strings.Contains(comment, value) {
 			ret = append(ret, cmd)
@@ -348,7 +348,7 @@ func ScheduleCommand(cmd Command, f func(*ScheduledCommand, chan int)) Scheduled
 
 	sc.CmdHash = cmd.CmdHash
 	sc.CmdString = cmd.CmdString
-	sc.Comment = cmd.Comment
+	sc.Description = cmd.Description
 	sc.Duration = -1
 
 	// Create a channel to hold exit status

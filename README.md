@@ -40,7 +40,7 @@ The command to add requires two flags.
 
 ```bash
 $ ./recmd-cli add
-Usage: recmd-cli add -c <command> -i <comment>
+Usage: recmd-cli add -c <command> -d <description>
 ```
 
 ## Configuration
@@ -51,7 +51,7 @@ recmd-cli stores commands in $HOME/.cmd_history.json. Use recmd-cli init to crea
 
 ```bash
 $ ./recmd-cli list
-COMMAND HASH            COMMAND STRING                                  COMMENT                                                 DURATION
+HASH                    COMMAND                                         DESCRIPTION                                             DURATION
 4a8a9fc31dc15a4         df                                              Show disk usage                                         0 second(s)
 f10cad261de273f         hostname -i | awk -F" " '{print $1}'            Show IP address                                         0 second(s)
 0103f67a0bc0b4e         docker images -a | grep "^<none>"               List all images with no tag                             0 second(s)
@@ -102,7 +102,7 @@ With double quotes:
 ```bash
 $ ./recmd-cli add  -c "(echo `ls -al ~/. | wc -l` - 2) | bc" -i "Count of dot files in home directory"
 [taro@zaxman recmd-cli]$ ./recmd-cli list
-COMMAND HASH            COMMAND STRING                                  COMMENT                                                 DURATION
+HASH                    COMMAND                                         DESCRIPTION                                             DURATION
 e75710f201f513f         (echo 155 - 2) | bc                             Count of dot files in home directory                    -
 ```
 
@@ -111,6 +111,6 @@ With single quotes:
 ```bash
 $ ./recmd-cli add  -c '(echo `ls -al ~/. | wc -l` - 2) | bc' -i "Count of dot files in home directory"
 [taro@zaxman recmd-cli]$ ./recmd-cli list
-COMMAND HASH            COMMAND STRING                                  COMMENT                                                 DURATION
+HASH                    COMMAND                                         DESCRIPTION                                             DURATION
 2f35231f613da42         (echo `ls -al ~/. | wc -l` - 2) | bc            Count of dot files in home directory                    -
 ```

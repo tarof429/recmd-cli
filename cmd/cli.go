@@ -21,13 +21,13 @@ func display(ret []recmd.Command) {
 		fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", a, b, c, d)
 	}
 
-	show("COMMAND HASH", "COMMAND STRING", "COMMENT", "DURATION")
+	show("HASH", "COMMAND", "DESCRIPTION", "DURATION")
 
 	for _, c := range ret {
 		cmdHash := c.CmdHash[0:15]
 
 		var cmdString string
-		var comment string
+		var Description string
 
 		if len(c.CmdString) > 40 {
 			cmdString = c.CmdString[0:40] + "..."
@@ -35,10 +35,10 @@ func display(ret []recmd.Command) {
 			cmdString = c.CmdString
 		}
 
-		if len(c.Comment) > 50 {
-			comment = c.Comment[0:50] + "..."
+		if len(c.Description) > 50 {
+			Description = c.Description[0:50] + "..."
 		} else {
-			comment = c.Comment
+			Description = c.Description
 		}
 
 		var durationString string
@@ -58,7 +58,7 @@ func display(ret []recmd.Command) {
 
 		}
 
-		show(cmdHash, cmdString, comment, durationString)
+		show(cmdHash, cmdString, Description, durationString)
 
 	}
 }
