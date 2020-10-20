@@ -79,7 +79,7 @@ func TestReadCmdHistoryFile(t *testing.T) {
 	})
 }
 
-func TestCreateCmdHistoryFiel(t *testing.T) {
+func TestCreateCmdHistoryFile(t *testing.T) {
 	if CreateCmdHistoryFile(testdataDir) == false {
 		t.Fail()
 	}

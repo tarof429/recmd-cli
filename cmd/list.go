@@ -30,20 +30,14 @@ var listCmd = &cobra.Command{
 	Long:  `List commands.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		homeDir, err := os.UserHomeDir()
+		recmd.InitTool()
+		ret, err := recmd.List()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
-		}
-
-		ret, err := recmd.ReadCmdHistoryFile(homeDir)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to get list %v\n", err)
 		}
 
 		display(ret)
-
 	},
 }
 

@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -32,6 +35,71 @@ type ScheduledCommand struct {
 
 const historyFile = ".cmd_history.json"
 
+const (
+	// D(rectory containing configuration and command history
+	recmdDir = ".recmd"
+
+	// The secret file
+	recmdSecretFile = "recmd_secret"
+
+	// The command history file
+	recmdHistoryFile = "recmd_history.json"
+
+	// Length of scret string
+	secretLength = 40
+)
+
+// Global variables
+var (
+	recmdDirPath        string
+	recmdSecretFilePath string
+	secretData          string
+	cmdHistoryFilePath  string
+)
+
+// InitTool initializes the tool
+func InitTool() {
+
+	// Create ~/.recmd if it doesn't exist
+	homeDir, err := os.UserHomeDir()
+
+	if err != nil {
+		log.Fatalf("Error, unable to obtain home directory path %v\n", err)
+	}
+
+	recmdDirPath = filepath.Join(homeDir, recmdDir)
+
+	fileInfo, statErr := os.Stat(recmdDirPath)
+
+	if os.IsNotExist((statErr)) {
+		if err != nil {
+			log.Fatalf("Error, please start recmd-dmn first: %v\n", err)
+		}
+	} else if !fileInfo.IsDir() {
+		log.Fatalf("Error, ~/.recmd is not a directory")
+	}
+
+	recmdSecretFilePath = filepath.Join(recmdDirPath, recmdSecretFile)
+
+	// Load the command history file path. We don't need to read it yet.
+	cmdHistoryFilePath = filepath.Join(recmdDirPath, recmdHistoryFile)
+}
+
+// GetSecret gets the secret from the file system
+func GetSecret() string {
+	secretData, err := ioutil.ReadFile(recmdSecretFilePath)
+
+	if err != nil {
+		log.Fatalf("Error, unable to read secret from file %v\n", err)
+	}
+
+	if len(secretData) != secretLength {
+		log.Fatalf("Error, invalid secret length %v\n", err)
+	}
+
+	return string(secretData)
+}
+
 // ReadCmdHistoryFile reads historyFile and generates a list of Command structs
 func ReadCmdHistoryFile(dir string) ([]Command, error) {
 
@@ -55,6 +123,33 @@ func ReadCmdHistoryFile(dir string) ([]Command, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while unmarshalling: %v\n", err)
 	}
+
+	return cmds, err
+
+}
+
+func List() ([]Command, error) {
+	var (
+		historyData []byte    // Data representing our history file
+		cmds        []Command // List of commands produced after unmarshalling historyData
+		err         error     // Any errors we might encounter
+	)
+
+	secret := GetSecret()
+
+	url := "http://localhost:8999/secret/" + secret + "/list"
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer resp.Body.Close()
+
+	historyData, _ = ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(historyData, &cmds)
 
 	return cmds, err
 
