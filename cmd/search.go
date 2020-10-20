@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -34,21 +35,35 @@ var searchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		recmd.InitTool()
+
 		value := args[0]
 
-		homeDir, err := os.UserHomeDir()
+		ret, err := recmd.SearchCmd(value)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to search command %v\n", err)
 		}
 
-		ret, err := recmd.SearchCmd(homeDir, value)
+		fmt.Println(ret)
+		data, _ := json.MarshalIndent(ret, "", "\t")
+		fmt.Println(string(data))
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
-		}
+		// value := args[0]
 
-		display(ret)
+		// homeDir, err := os.UserHomeDir()
+
+		// if err != nil {
+		// 	fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
+		// }
+
+		// ret, err := recmd.SearchCmd(homeDir, value)
+
+		// if err != nil {
+		// 	fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
+		// }
+
+		// display(ret)
 	},
 }
 

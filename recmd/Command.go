@@ -185,27 +185,31 @@ func SelectCmd(value string) (Command, error) {
 }
 
 // SearchCmd returns a command by name
-func SearchCmd(dir string, value string) ([]Command, error) {
+func SearchCmd(value string) ([]Command, error) {
 
-	cmds, error := ReadCmdHistoryFile(dir)
+	var (
+		historyData []byte    // Data representing our history file
+		cmds        []Command // List of commands produced after unmarshalling historyData
+		err         error     // Any errors we might encounter
+	)
 
-	ret := []Command{}
+	secret := GetSecret()
 
-	if error != nil {
-		return []Command{}, error
+	url := "http://localhost:8999/secret/" + secret + "/search/description/" + value
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	for _, cmd := range cmds {
+	defer resp.Body.Close()
 
-		// Use lower case for evaluation
-		comment := strings.ToLower(cmd.Description)
+	historyData, _ = ioutil.ReadAll(resp.Body)
 
-		if strings.Contains(comment, value) {
-			ret = append(ret, cmd)
-		}
-	}
+	json.Unmarshal(historyData, &cmds)
 
-	return ret, nil
+	return cmds, err
 }
 
 // DeleteCmd deletes a command. It's best to pass in the commandHash
