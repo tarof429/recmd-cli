@@ -36,22 +36,20 @@ var selectCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		recmd.InitTool()
+
 		value := args[0]
 
-		homeDir, err := os.UserHomeDir()
+		ret, err := recmd.SelectCmd(value)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to select command %v\n", err)
 		}
 
-		ret, err := recmd.SelectCmd(homeDir, value)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
-		}
-
+		fmt.Println(ret)
 		data, _ := json.MarshalIndent(ret, "", "\t")
 		fmt.Println(string(data))
+
 	},
 }
 

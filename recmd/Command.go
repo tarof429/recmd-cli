@@ -128,6 +128,7 @@ func ReadCmdHistoryFile(dir string) ([]Command, error) {
 
 }
 
+// List lists the commands
 func List() ([]Command, error) {
 	var (
 		historyData []byte    // Data representing our history file
@@ -156,22 +157,31 @@ func List() ([]Command, error) {
 }
 
 // SelectCmd returns a command
-func SelectCmd(dir string, value string) (Command, error) {
+func SelectCmd(value string) (Command, error) {
 
-	cmds, error := ReadCmdHistoryFile(dir)
+	var (
+		historyData []byte  // Data representing our history file
+		cmd         Command // List of commands produced after unmarshalling historyData
+		err         error   // Any errors we might encounter
+	)
 
-	if error != nil {
-		return Command{}, error
+	secret := GetSecret()
+
+	url := "http://localhost:8999/secret/" + secret + "/select/cmdHash/" + value
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	for _, cmd := range cmds {
+	defer resp.Body.Close()
 
-		if strings.Index(cmd.CmdHash, value) == 0 {
-			return cmd, nil
-		}
-	}
+	historyData, _ = ioutil.ReadAll(resp.Body)
 
-	return Command{}, nil
+	json.Unmarshal(historyData, &cmd)
+
+	return cmd, err
 }
 
 // SearchCmd returns a command by name

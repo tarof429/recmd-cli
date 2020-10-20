@@ -31,6 +31,7 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		recmd.InitTool()
+
 		ret, err := recmd.List()
 
 		if err != nil {

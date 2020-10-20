@@ -16,12 +16,10 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 var commandField string
@@ -38,28 +36,28 @@ var inspectCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		homeDir, err := os.UserHomeDir()
+		// homeDir, err := os.UserHomeDir()
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
-		}
+		// if err != nil {
+		// 	fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
+		// }
 
-		value := args[0]
+		// value := args[0]
 
-		selectedCmd, cerr := recmd.SelectCmd(homeDir, value)
+		// selectedCmd, cerr := recmd.SelectCmd(homeDir, value)
 
-		if cerr != nil {
-			fmt.Fprintf(os.Stderr, "Unable to read history file: %s\n", err)
-		}
+		// if cerr != nil {
+		// 	fmt.Fprintf(os.Stderr, "Unable to read history file: %s\n", err)
+		// }
 
-		if selectedCmd.CmdHash == "" {
-			fmt.Fprintf(os.Stderr, "Unable to find command\n")
-			return
-		}
+		// if selectedCmd.CmdHash == "" {
+		// 	fmt.Fprintf(os.Stderr, "Unable to find command\n")
+		// 	return
+		// }
 
-		// Print the command
-		data, _ := json.MarshalIndent(selectedCmd, "", "\t")
-		fmt.Println(string(data))
+		// // Print the command
+		// data, _ := json.MarshalIndent(selectedCmd, "", "\t")
+		// fmt.Println(string(data))
 
 	},
 }
