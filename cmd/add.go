@@ -1,3 +1,5 @@
+package cmd
+
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
 
@@ -13,7 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
 
 import (
 	"fmt"
@@ -24,8 +25,10 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-var command string
-var description string
+var (
+	command     string // The command to run
+	description string // Description of the command
+)
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{

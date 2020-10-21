@@ -1,3 +1,5 @@
+package cmd
+
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
 
@@ -13,12 +15,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	recmd "github.com/tarof429/recmd-cli/recmd"
@@ -37,9 +39,9 @@ var searchCmd = &cobra.Command{
 
 		recmd.InitTool()
 
-		value := args[0]
+		commandHash := strings.Trim(args[0], "")
 
-		ret, err := recmd.SearchCmd(value)
+		ret, err := recmd.SearchCmd(commandHash)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to search command %v\n", err)
