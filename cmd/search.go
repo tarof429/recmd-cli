@@ -45,25 +45,8 @@ var searchCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to search command %v\n", err)
 		}
 
-		fmt.Println(ret)
 		data, _ := json.MarshalIndent(ret, "", "\t")
 		fmt.Println(string(data))
-
-		// value := args[0]
-
-		// homeDir, err := os.UserHomeDir()
-
-		// if err != nil {
-		// 	fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
-		// }
-
-		// ret, err := recmd.SearchCmd(homeDir, value)
-
-		// if err != nil {
-		// 	fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
-		// }
-
-		// display(ret)
 	},
 }
 
