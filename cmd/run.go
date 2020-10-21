@@ -30,6 +30,8 @@ var runCmd = &cobra.Command{
 	Long:  `Run a command`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		fmt.Println(len(args))
+
 		if len(args) != 1 {
 			fmt.Println("Error: either the command or hash must be specified")
 			os.Exit(1)

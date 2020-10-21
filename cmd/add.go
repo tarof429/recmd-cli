@@ -18,13 +18,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 var command string
-var message string
+var description string
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -33,24 +34,24 @@ var addCmd = &cobra.Command{
 	Long:  `Add a command`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if command == "" || message == "" {
+
+		if command == "" || description == "" {
 			cmd.Usage()
 			os.Exit(1)
 		}
 
-		homeDir, err := os.UserHomeDir()
+		recmd.InitTool()
 
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
+		ret := recmd.AddCmd(command, description)
+
+		status, _ := strconv.ParseBool(ret)
+
+		if status == false {
+			fmt.Fprintf(os.Stderr, "Command already exists.\n")
+		} else {
+			fmt.Println("Command successfully added.")
 		}
 
-		testCmd := recmd.NewCommand(command, message)
-
-		ret := recmd.WriteCmdHistoryFile(homeDir, testCmd)
-
-		if ret == false {
-			fmt.Fprintf(os.Stderr, "An error occurred while writing the history file\n")
-		}
 	},
 }
 
@@ -58,7 +59,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	addCmd.Flags().StringVarP(&command, "command", "c", "", "Command line")
-	addCmd.Flags().StringVarP(&message, "description", "d", "", "Description")
+	addCmd.Flags().StringVarP(&description, "description", "d", "", "Description")
 	// addCmd.AddCommand(&comment, "message", "m", 1, "Message about the command")
 
 	// Here you will define your flags and configuration settings.

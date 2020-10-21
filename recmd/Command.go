@@ -269,6 +269,34 @@ func RunCmd(value string) ScheduledCommand {
 	return cmd
 }
 
+// AddCmd adds a command.
+func AddCmd(command string, description string) string {
+
+	var (
+		data   []byte // Data representing status
+		status string // Status
+		err    error  // Any errors we might encounter
+	)
+
+	secret := GetSecret()
+
+	url := "http://localhost:8999/secret/" + secret + "/add/command/" + command + "/description/" + description
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer resp.Body.Close()
+
+	data, _ = ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(data, &status)
+
+	return status
+}
+
 // OverwriteCmdHistoryFile overwrites the history file with []Command passed in as a parameter
 func OverwriteCmdHistoryFile(dir string, cmds []Command) bool {
 
