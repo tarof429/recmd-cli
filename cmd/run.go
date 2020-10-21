@@ -37,41 +37,17 @@ var runCmd = &cobra.Command{
 
 		recmd.InitTool()
 
-		// homeDir, err := os.UserHomeDir()
+		value := args[0]
 
-		// if err != nil {
-		// 	fmt.Fprintf(os.Stderr, "Error, unable to obtain home directory path %v\n", err)
-		// 	return
-		// }
+		ret := recmd.RunCmd(value)
 
-		// value := args[0]
+		if ret.CmdHash == "" {
+			fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
+			os.Exit(1)
+		}
 
-		// selectedCmd, cerr := recmd.SelectCmd(homeDir, value)
+		fmt.Println(ret.Coutput)
 
-		// if cerr != nil {
-		// 	fmt.Fprintf(os.Stderr, "Error: unable to read history file: %s\n", err)
-		// 	return
-		// }
-
-		// if selectedCmd.CmdHash == "" {
-		// 	fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
-		// 	os.Exit(1)
-		// }
-
-		// sc := recmd.ScheduleCommand(selectedCmd, recmd.RunShellScriptCommandWithSpinner)
-
-		// if len(sc.Coutput) != 0 {
-		// 	fmt.Println(sc.Coutput)
-		// }
-
-		// defer os.Exit(sc.ExitStatus)
-
-		// ret := recmd.UpdateCommandDuration(homeDir, selectedCmd, sc.Duration)
-
-		// if ret != true {
-		// 	fmt.Fprintf(os.Stderr, "Error while updating command")
-		// 	os.Exit(1)
-		// }
 	},
 }
 

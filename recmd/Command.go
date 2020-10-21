@@ -241,6 +241,34 @@ func DeleteCmd(value string) int {
 	return index
 }
 
+// RunCmd run s a command
+func RunCmd(value string) ScheduledCommand {
+
+	var (
+		historyData []byte           // Data representing our history file
+		cmd         ScheduledCommand // List of commands produced after unmarshalling historyData
+		err         error            // Any errors we might encounter
+	)
+
+	secret := GetSecret()
+
+	url := "http://localhost:8999/secret/" + secret + "/run/cmdHash/" + value
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer resp.Body.Close()
+
+	historyData, _ = ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(historyData, &cmd)
+
+	return cmd
+}
+
 // OverwriteCmdHistoryFile overwrites the history file with []Command passed in as a parameter
 func OverwriteCmdHistoryFile(dir string, cmds []Command) bool {
 
