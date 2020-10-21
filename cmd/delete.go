@@ -35,19 +35,16 @@ var deleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		recmd.InitTool()
+
 		value := args[0]
 
-		homeDir, err := os.UserHomeDir()
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to obtain home directory path %v\n", err)
-		}
-
-		foundIndex := recmd.DeleteCmd(homeDir, value)
+		foundIndex := recmd.DeleteCmd(value)
 
 		if foundIndex == -1 {
 			fmt.Fprintf(os.Stderr, "Unable to find command in history\n")
 		}
+
 	},
 }
 

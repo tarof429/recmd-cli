@@ -214,33 +214,31 @@ func SearchCmd(value string) ([]Command, error) {
 
 // DeleteCmd deletes a command. It's best to pass in the commandHash
 // because commands may look similar.
-func DeleteCmd(dir string, value string) int {
+func DeleteCmd(value string) int {
 
-	cmds, error := ReadCmdHistoryFile(dir)
+	var (
+		indexData []byte // Data representing our history file
+		index     int    // List of commands produced after unmarshalling historyData
+		err       error  // Any errors we might encounter
+	)
 
-	if error != nil {
-		return -1
+	secret := GetSecret()
+
+	url := "http://localhost:8999/secret/" + secret + "/delete/cmdHash/" + value
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	foundIndex := -1
+	defer resp.Body.Close()
 
-	for index, cmd := range cmds {
-		if strings.Index(cmd.CmdHash, value) == 0 {
-			foundIndex = index
-			break
-		}
-	}
+	indexData, _ = ioutil.ReadAll(resp.Body)
 
-	if foundIndex != -1 {
-		//fmt.Println("Found command. Found index was " + strconv.Itoa(foundIndex))
-		// We may want to do more investigation to know why this works...
-		cmds = append(cmds[:foundIndex], cmds[foundIndex+1:]...)
+	json.Unmarshal(indexData, &index)
 
-		// Return whether we are able to overwrite the history file
-		OverwriteCmdHistoryFile(dir, cmds)
-	}
-
-	return foundIndex
+	return index
 }
 
 // OverwriteCmdHistoryFile overwrites the history file with []Command passed in as a parameter
