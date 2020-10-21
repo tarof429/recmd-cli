@@ -25,14 +25,16 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
+var (
+	background bool
+)
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run a command",
 	Long:  `Run a command`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		fmt.Println(len(args))
 
 		if len(args) != 1 {
 			fmt.Println("Error: either the command or hash must be specified")
@@ -43,20 +45,24 @@ var runCmd = &cobra.Command{
 
 		commandHash := strings.Trim(args[0], "")
 
-		ret := recmd.RunCmd(commandHash)
+		ret := recmd.RunCmd(commandHash, background)
 
-		if ret.CmdHash == "" {
-			fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
-			os.Exit(1)
+		if background == false {
+			if ret.CmdHash == "" {
+				fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
+				os.Exit(1)
+			}
+
+			fmt.Println(ret.Coutput)
 		}
-
-		fmt.Println(ret.Coutput)
 
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
+
+	runCmd.Flags().BoolVarP(&background, "background", "b", false, "Run command in the background")
 
 	// Here you will define your flags and configuration settings.
 

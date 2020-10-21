@@ -242,7 +242,7 @@ func DeleteCmd(value string) int {
 }
 
 // RunCmd run s a command
-func RunCmd(value string) ScheduledCommand {
+func RunCmd(value string, background bool) ScheduledCommand {
 
 	var (
 		historyData []byte           // Data representing our history file
@@ -250,9 +250,35 @@ func RunCmd(value string) ScheduledCommand {
 		err         error            // Any errors we might encounter
 	)
 
+	cfg := yacspin.Config{
+		Frequency:       100 * time.Millisecond,
+		CharSet:         yacspin.CharSets[14],
+		Suffix:          " Scheduling commmand ",
+		SuffixAutoColon: true,
+		StopCharacter:   "✓",
+		StopColors:      []string{"fgGreen"},
+	}
+
 	secret := GetSecret()
 
 	url := "http://localhost:8999/secret/" + secret + "/run/cmdHash/" + value
+
+	spinner, _ := yacspin.New(cfg)
+
+	if background == true {
+
+		spinner.Start()
+
+		go http.Get(url)
+
+		time.Sleep(1 * time.Second)
+
+		spinner.Stop()
+
+		return cmd
+	}
+
+	spinner.Start()
 
 	resp, err := http.Get(url)
 
@@ -265,6 +291,8 @@ func RunCmd(value string) ScheduledCommand {
 	historyData, _ = ioutil.ReadAll(resp.Body)
 
 	json.Unmarshal(historyData, &cmd)
+
+	spinner.Stop()
 
 	return cmd
 }
