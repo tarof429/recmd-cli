@@ -2,6 +2,7 @@ package recmd
 
 import (
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -100,32 +101,10 @@ func GetSecret() string {
 	return string(secretData)
 }
 
-// ReadCmdHistoryFile reads historyFile and generates a list of Command structs
-func ReadCmdHistoryFile(dir string) ([]Command, error) {
+func getBase64(line string) string {
 
-	var (
-		historyData []byte    // Data representing our history file
-		cmds        []Command // List of commands produced after unmarshalling historyData
-		err         error     // Any errors we might encounter
-	)
-
-	// Read the history file into historyData
-	historyData, err = ioutil.ReadFile(dir + "/" + historyFile)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "An error occurred while reading historyfile: %v\n", err)
-		return cmds, err
-	}
-
-	// Unmarshall historyData into a list of commands
-	err = json.Unmarshal(historyData, &cmds)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while unmarshalling: %v\n", err)
-	}
-
-	return cmds, err
-
+	lineData := []byte(line)
+	return base64.StdEncoding.EncodeToString(lineData)
 }
 
 // List lists the commands
@@ -136,9 +115,9 @@ func List() ([]Command, error) {
 		err         error     // Any errors we might encounter
 	)
 
-	secret := GetSecret()
+	encodedSecret := getBase64(GetSecret())
 
-	url := "http://localhost:8999/secret/" + secret + "/list"
+	url := "http://localhost:8999/secret/" + encodedSecret + "/list"
 
 	resp, err := http.Get(url)
 
@@ -165,9 +144,10 @@ func SelectCmd(value string) (Command, error) {
 		err         error   // Any errors we might encounter
 	)
 
-	secret := GetSecret()
+	encodedSecret := getBase64(GetSecret())
+	encodedCommandHash := getBase64(value)
 
-	url := "http://localhost:8999/secret/" + secret + "/select/cmdHash/" + value
+	url := "http://localhost:8999/secret/" + encodedSecret + "/select/cmdHash/" + encodedCommandHash
 
 	resp, err := http.Get(url)
 
@@ -193,9 +173,10 @@ func SearchCmd(value string) ([]Command, error) {
 		err         error     // Any errors we might encounter
 	)
 
-	secret := GetSecret()
+	encodedSecret := getBase64(GetSecret())
+	encodedDescription := getBase64(value)
 
-	url := "http://localhost:8999/secret/" + secret + "/search/description/" + value
+	url := "http://localhost:8999/secret/" + encodedSecret + "/search/description/" + encodedDescription
 
 	resp, err := http.Get(url)
 
@@ -222,9 +203,10 @@ func DeleteCmd(value string) int {
 		err       error  // Any errors we might encounter
 	)
 
-	secret := GetSecret()
+	encodedSecret := getBase64(GetSecret())
+	encodedCommandHash := getBase64(value)
 
-	url := "http://localhost:8999/secret/" + secret + "/delete/cmdHash/" + value
+	url := "http://localhost:8999/secret/" + encodedSecret + "/delete/cmdHash/" + encodedCommandHash
 
 	resp, err := http.Get(url)
 
@@ -259,9 +241,10 @@ func RunCmd(value string, background bool) ScheduledCommand {
 		StopColors:      []string{"fgGreen"},
 	}
 
-	secret := GetSecret()
+	encodedSecret := getBase64(GetSecret())
+	encodedCommandHash := getBase64(value)
 
-	url := "http://localhost:8999/secret/" + secret + "/run/cmdHash/" + value
+	url := "http://localhost:8999/secret/" + encodedSecret + "/run/cmdHash/" + encodedCommandHash
 
 	spinner, _ := yacspin.New(cfg)
 
@@ -306,9 +289,11 @@ func AddCmd(command string, description string) string {
 		err    error  // Any errors we might encounter
 	)
 
-	secret := GetSecret()
+	encodedSecret := getBase64(GetSecret())
+	encodedCommand := getBase64(command)
+	encodedDescription := getBase64(description)
 
-	url := "http://localhost:8999/secret/" + secret + "/add/command/" + command + "/description/" + description
+	url := "http://localhost:8999/secret/" + encodedSecret + "/add/command/" + encodedCommand + "/description/" + encodedDescription
 
 	resp, err := http.Get(url)
 
