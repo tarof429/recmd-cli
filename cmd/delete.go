@@ -41,9 +41,13 @@ var deleteCmd = &cobra.Command{
 
 		commandHash := strings.Trim(args[0], "")
 
-		foundIndex := recmd.DeleteCmd(commandHash)
+		cmds, err := recmd.DeleteCmd(commandHash)
 
-		if foundIndex == -1 {
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to delete command %v\n", err)
+		}
+
+		if len(cmds) == 0 {
 			fmt.Fprintf(os.Stderr, "Unable to find command in history\n")
 		}
 

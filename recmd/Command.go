@@ -195,12 +195,12 @@ func SearchCmd(value string) ([]Command, error) {
 
 // DeleteCmd deletes a command. It's best to pass in the commandHash
 // because commands may look similar.
-func DeleteCmd(value string) int {
+func DeleteCmd(value string) ([]Command, error) {
 
 	var (
-		indexData []byte // Data representing our history file
-		index     int    // List of commands produced after unmarshalling historyData
-		err       error  // Any errors we might encounter
+		historyData []byte    // Data representing our history file
+		cmds        []Command // List of commands produced after unmarshalling historyData
+		err         error     // Any errors we might encounter
 	)
 
 	encodedSecret := getBase64(GetSecret())
@@ -216,11 +216,11 @@ func DeleteCmd(value string) int {
 
 	defer resp.Body.Close()
 
-	indexData, _ = ioutil.ReadAll(resp.Body)
+	historyData, _ = ioutil.ReadAll(resp.Body)
 
-	json.Unmarshal(indexData, &index)
+	err = json.Unmarshal(historyData, &cmds)
 
-	return index
+	return cmds, err
 }
 
 // RunCmd run s a command
