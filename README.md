@@ -2,18 +2,16 @@
 
 ## Introduction
 
-recmd is a small tool for running commands. The tool user interface was inspired by the *docker* command. Commands are run *in place* and do not involve agents or monitoring of external processes. As such, this tool is best suited for commands that have short execution times.
+`recmd` is a small tool for running commands. The tool's user interface is inspired by the *docker* command.
 
 ## Quick start
 
 Invoking recmd-cli will display the available commands.
 
 ```bash
-$ ./recmd-cli 
+$ ./recmd-cli
 
-        recmd-cli is a command runner which manages commands. You can store
-        commands in-line or execute scripts. It supports simple CRUD operations. 
-        Commands can be modified by editing the JSON configuration file.
+	recmd-cli is a command runner which manages commands. You can store commands in-line or execute scripts. It supports simple CRUD operations.
 
 Usage:
   recmd-cli [command]
@@ -22,11 +20,10 @@ Available Commands:
   add         Add a command
   delete      Delete a command
   help        Help about any command
-  init        Initialize the application
-  inspect     Inspect the command
   list        List commands
   run         Run a command
-  search      Search for a command
+  search      Search for a command by its comment
+  select      Select a command by is hash
 
 Flags:
       --config string   config file (default is $HOME/.recmd-cli.yaml)
@@ -49,6 +46,13 @@ recmd-cli stores commands in $HOME/.cmd_history.json. Use recmd-cli init to crea
 
 ## Usage 
 
+First start `recmd-dmn`. 
+
+```bash
+$ ./recmd-dmn
+2020/10/23 17:47:08 Starting server on :8999
+```
+
 ```bash
 $ ./recmd-cli list
 HASH                    COMMAND                                         DESCRIPTION                                             DURATION
@@ -62,35 +66,20 @@ d8e7c90b269a1ca         sleep 3; echo hello!                            Sleep...
 ebfdec641529d4b         ls                                              List files                                              0 second(s)
 920f8f5815b381e         env                                             env                                                     0 second(s) 
 
-$ ./recmd-cli run d8e7c90b269a1ca
-⠋ Scheduling commmand hello!
-
-✓ Scheduling commmand 
-$ ./recmd-cli add -c "sudo ss -tulpn | grep :80" -i "Find what process is listening to port 80"
-$ ./recmd-cli list|grep 80
-6e2d304e213958e         sudo ss -tulpn | grep :80                       Find what process is listening to port 80               -
-$ ./recmd-cli run 6e2d304e213958e
-⠋ Scheduling commmand tcp   LISTEN 0      511          0.0.0.0:8000      0.0.0.0:*    users:(("nginx",pid=543724,fd=5),("nginx",pid=543723,fd=5))
-tcp   LISTEN 0      511          0.0.0.0:80        0.0.0.0:*    users:(("nginx",pid=543724,fd=4),("nginx",pid=543723,fd=4))
-
-✓ Scheduling commmand 
+$  ./recmd-cli run 18b63bce19510d0
+✓ Scheduling commmand
+Using default tag: latest
+latest: Pulling from ubuntucore/jenkins-ubuntu
+Digest: sha256:662cdd29e6b2b8d50f2c4e2ffa5121740c40bc518848ff912065d6a163846e65
+Status: Image is up to date for ubuntucore/jenkins-ubuntu:latest
+docker.io/ubuntucore/jenkins-ubuntu:latest
 ```
 
-It is possible to add commands that read from environment variables. For example, we could add a command that takes a port variable.
+If you know the command will run for a long period of time, and you do not want `recmd` to block, there is a -b option which returns control back to the user after a 1 second delay. The command below likewise pulls the ubuntu image.
 
 ```bash
-$ ./recmd-cli add -c 'sudo ss -tulpn | grep :$port' -p "port=$port" -i "Find what process is listenning to port"
-```
-
-Then to use this function, we would set the port variable just as we are invoking recmd-cli.
-
-```bash
-$ ./recmd-cli list |grep \$port
-6d83258f3296b50         sudo ss -tulpn | grep :$port                    Find what process is listenning to port                 0 second(s)
-
-$ export port=8080;./recmd-cli run 6d83258f3296b50;unset port
-✓ Scheduling commmand 
-tcp   LISTEN 0      4096               *:8080             *:*    users:(("hello",pid=160507,fd=3))  
+$   ./recmd-cli run 18b63bce19510d0 -b
+✓ Scheduling commmand
 ```
 
 ## Gotchas!
@@ -100,17 +89,14 @@ If your command uses backticks, use single-quotes around the command instead of 
 With double quotes:
 
 ```bash
-$ ./recmd-cli add  -c "(echo `ls -al ~/. | wc -l` - 2) | bc" -i "Count of dot files in home directory"
-[taro@zaxman recmd-cli]$ ./recmd-cli list
-HASH                    COMMAND                                         DESCRIPTION                                             DURATION
-e75710f201f513f         (echo 155 - 2) | bc                             Count of dot files in home directory                    -
-```
-
-With single quotes:
-
-```bash
-$ ./recmd-cli add  -c '(echo `ls -al ~/. | wc -l` - 2) | bc' -i "Count of dot files in home directory"
-[taro@zaxman recmd-cli]$ ./recmd-cli list
-HASH                    COMMAND                                         DESCRIPTION                                             DURATION
-2f35231f613da42         (echo `ls -al ~/. | wc -l` - 2) | bc            Count of dot files in home directory                    -
+$ ./recmd-cli add  -c '(echo `ls -al ~/. | wc -l` - 2) | bc' -d "Count of dot files in home directory"
+$ ./recmd-cli search count
+[
+	{
+		"commandHash": "2f35231f613da4276feb1c4274375c",
+		"commandString": "(echo `ls -al ~/. | wc -l` - 2) | bc",
+		"description": "Count of dot files in home directory",
+		"duration": -1
+	}
+]
 ```
