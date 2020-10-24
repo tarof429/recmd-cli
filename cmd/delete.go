@@ -33,7 +33,7 @@ var deleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Error: either the command or hash must be specified")
+			fmt.Println("Error: the command must be specified")
 			os.Exit(1)
 		}
 

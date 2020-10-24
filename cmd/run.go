@@ -38,7 +38,7 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Error: either the command or hash must be specified")
+			fmt.Println("Error: the hash must be specified")
 			os.Exit(1)
 		}
 
@@ -52,7 +52,7 @@ var runCmd = &cobra.Command{
 		// backgroundFlag is a flag that determines whether to run a command in the background
 		if backgroundFlag == false {
 			if ret.CmdHash == "" {
-				fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
+				fmt.Fprintf(os.Stderr, "Error: hash not found\n")
 				os.Exit(1)
 			}
 

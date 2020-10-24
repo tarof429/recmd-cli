@@ -36,7 +36,7 @@ var searchCmd = &cobra.Command{
 	Long:  `Search for a command by its comment`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			fmt.Println("Must specify the command")
+			fmt.Println("Error: any part of the comment must be specified")
 			os.Exit(1)
 		}
 
@@ -47,7 +47,7 @@ var searchCmd = &cobra.Command{
 		ret, err := recmd.SearchCmd(description)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to search command %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
 		}
 
 		data, _ := json.MarshalIndent(ret, "", "\t")

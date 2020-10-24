@@ -34,7 +34,7 @@ var selectCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Must specify the command")
+			fmt.Println("Error: the command hash must be specified")
 			os.Exit(1)
 		}
 
