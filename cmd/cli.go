@@ -11,8 +11,8 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// display lists the given list of commands in a table format
-func display(ret []recmd.Command) {
+// Display lists the given list of commands in a table format
+func Display(ret []recmd.Command) {
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 4, ' ', 0)
 
 	defer w.Flush()

@@ -25,7 +25,7 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// deleteCmd represents the delete command
+// deleteCmd represents the delete command. It takes one parameter, the command hash.
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete a command",

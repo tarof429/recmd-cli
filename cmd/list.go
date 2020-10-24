@@ -24,7 +24,7 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// listCmd represents the list command
+// listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List commands",
@@ -39,7 +39,7 @@ var listCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Unable to get list %v\n", err)
 		}
 
-		display(ret)
+		Display(ret)
 	},
 }
 

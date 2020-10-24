@@ -48,10 +48,8 @@ const (
 
 // Global variables
 var (
-	recmdDirPath        string
 	recmdSecretFilePath string
 	secretData          string
-	cmdHistoryFilePath  string
 )
 
 // InitTool initializes the tool
@@ -64,7 +62,7 @@ func InitTool() {
 		log.Fatalf("Error, unable to obtain home directory path %v\n", err)
 	}
 
-	recmdDirPath = filepath.Join(homeDir, recmdDir)
+	recmdDirPath := filepath.Join(homeDir, recmdDir)
 
 	fileInfo, statErr := os.Stat(recmdDirPath)
 
@@ -78,8 +76,6 @@ func InitTool() {
 
 	recmdSecretFilePath = filepath.Join(recmdDirPath, recmdSecretFile)
 
-	// Load the command history file path. We don't need to read it yet.
-	cmdHistoryFilePath = filepath.Join(recmdDirPath, recmdHistoryFile)
 }
 
 // GetSecret gets the secret from the file system
@@ -270,8 +266,6 @@ func RunCmd(value string, background bool) ScheduledCommand {
 	historyData, _ = ioutil.ReadAll(resp.Body)
 
 	json.Unmarshal(historyData, &cmd)
-
-	//log.Printf("Hash received: %v with duration: %v", cmd.CmdHash, cmd.Duration)
 
 	spinner.Stop()
 

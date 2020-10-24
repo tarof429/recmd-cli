@@ -30,7 +30,9 @@ var (
 	description string // Description of the command
 )
 
-// addCmd represents the add command
+// addCmd represents the add command. It takes two parameter, the command string, and the description.
+// Both should be enclosed in quotes. All characters are acceeptable; It is sent to the server in
+// base64 format, which is not necessarily secure, but for the purpose of supporting characters such as '/'.
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a command",

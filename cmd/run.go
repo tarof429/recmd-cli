@@ -26,10 +26,11 @@ import (
 )
 
 var (
-	background bool
+	// backgroundFlag is a flag that determines whether to run a command in the background
+	backgroundFlag bool
 )
 
-// runCmd represents the run command
+// The runCmd represents the run command. It takes one parameter, the command hash.
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run a command",
@@ -45,9 +46,11 @@ var runCmd = &cobra.Command{
 
 		commandHash := strings.Trim(args[0], "")
 
-		ret := recmd.RunCmd(commandHash, background)
+		// backgroundFlag is a flag that determines whether to run a command in the background
+		ret := recmd.RunCmd(commandHash, backgroundFlag)
 
-		if background == false {
+		// backgroundFlag is a flag that determines whether to run a command in the background
+		if backgroundFlag == false {
 			if ret.CmdHash == "" {
 				fmt.Fprintf(os.Stderr, "Error: hash not found.\n")
 				os.Exit(1)
@@ -62,7 +65,7 @@ var runCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(runCmd)
 
-	runCmd.Flags().BoolVarP(&background, "background", "b", false, "Run command in the background")
+	runCmd.Flags().BoolVarP(&backgroundFlag, "b", "b", false, "Run command in the background")
 
 	// Here you will define your flags and configuration settings.
 

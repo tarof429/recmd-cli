@@ -26,7 +26,10 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// searchCmd represents the search command
+// searchCmd represents the search command. It takes one parameter, the command description.
+// Multiple results may be returned; the output format is JSON (for the moment). Any command with
+// a matching string is returned; this makes it possible, for example, to show all commmands
+// that have 'docker' as part of its description.
 var searchCmd = &cobra.Command{
 	Use:   "search",
 	Short: "Search for a command by its comment",
@@ -39,9 +42,9 @@ var searchCmd = &cobra.Command{
 
 		recmd.InitTool()
 
-		commandHash := strings.Trim(args[0], "")
+		description := strings.Trim(args[0], "")
 
-		ret, err := recmd.SearchCmd(commandHash)
+		ret, err := recmd.SearchCmd(description)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to search command %v\n", err)

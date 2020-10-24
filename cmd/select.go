@@ -26,7 +26,7 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// selectCmd represents the select command
+// selectCmd represents the select command. It takes one parameter, the command hash.
 var selectCmd = &cobra.Command{
 	Use:   "select",
 	Short: "Select a command by is hash",
