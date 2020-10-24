@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`recmd` is a small tool for running commands. The tool's user interface is inspired by the *docker* command.
+`recmd` is a small tool for running commands. The tool's user interface is inspired by the *docker* CLI.
 
 ## Quick start
 
@@ -42,11 +42,11 @@ Usage: recmd-cli add -c <command> -d <description>
 
 ## Configuration
 
-recmd-cli stores commands in $HOME/.cmd_history.json. Use recmd-cli init to create it.
+recmd-cli stores commands in $HOME/.cmd_history.json. It is created automatically by `recmd-dmn`.
 
 ## Usage 
 
-First start `recmd-dmn`. 
+First start `recmd-dmn`. It must be started on the same host. 
 
 ```bash
 $ ./recmd-dmn
@@ -75,7 +75,7 @@ Status: Image is up to date for ubuntucore/jenkins-ubuntu:latest
 docker.io/ubuntucore/jenkins-ubuntu:latest
 ```
 
-If you know the command will run for a long period of time, and you do not want `recmd` to block, there is a -b option which returns control back to the user after a 1 second delay. The command below likewise pulls the ubuntu image.
+If you know the command will run for a long period of time, and you do not want `recmd-cli` to block, there is a -b option which returns control back to the user after a 1 second delay.
 
 ```bash
 $   ./recmd-cli run 18b63bce19510d0 -b
