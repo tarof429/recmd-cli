@@ -21,13 +21,16 @@ type Command struct {
 	Duration    time.Duration `json:"duration"`
 }
 
+type ScheduledStatus string
+
 // ScheduledCommand represents a command that is scheduled to run
 type ScheduledCommand struct {
 	Command
-	Coutput    string    `json:"coutput"`
-	ExitStatus int       `json:"exitStatus"`
-	StartTime  time.Time `json:"startTime"`
-	EndTime    time.Time `json:"endTime"`
+	Coutput    string          `json:"coutput"`
+	ExitStatus int             `json:"exitStatus"`
+	StartTime  time.Time       `json:"startTime"`
+	EndTime    time.Time       `json:"endTime"`
+	Status     ScheduledStatus `json:"status"`
 }
 
 const historyFile = ".cmd_history.json"
@@ -110,6 +113,34 @@ func List() ([]Command, error) {
 	encodedSecret := getBase64(GetSecret())
 
 	url := "http://localhost:8999/secret/" + encodedSecret + "/list"
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer resp.Body.Close()
+
+	historyData, _ = ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(historyData, &cmds)
+
+	return cmds, err
+
+}
+
+// Status gets the list of commands that are in the queue
+func Status() ([]ScheduledCommand, error) {
+	var (
+		historyData []byte             // Data representing our history file
+		cmds        []ScheduledCommand // List of commands in the queue
+		err         error              // Any errors we might encounter
+	)
+
+	encodedSecret := getBase64(GetSecret())
+
+	url := "http://localhost:8999/secret/" + encodedSecret + "/status"
 
 	resp, err := http.Get(url)
 

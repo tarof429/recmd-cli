@@ -11,6 +11,36 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
+// DisplayStatus lists the status of commands in a table format
+func DisplayStatus(ret []recmd.ScheduledCommand) {
+	w := tabwriter.NewWriter(os.Stdout, 2, 2, 4, ' ', 0)
+
+	defer w.Flush()
+
+	show := func(a, b, c interface{}) {
+		fmt.Fprintf(w, "%v\t%v\t%v\n", a, b, c)
+	}
+
+	show("HASH", "COMMAND", "STATUS")
+
+	for _, c := range ret {
+		cmdHash := c.CmdHash[0:15]
+
+		var cmdString string
+
+		if len(c.CmdString) > 40 {
+			cmdString = c.CmdString[0:40] + "..."
+		} else {
+			cmdString = c.CmdString
+		}
+
+		status := c.Status
+
+		show(cmdHash, cmdString, status)
+
+	}
+}
+
 // Display lists the given list of commands in a table format
 func Display(ret []recmd.Command) {
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 4, ' ', 0)
