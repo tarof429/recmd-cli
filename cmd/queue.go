@@ -24,11 +24,11 @@ import (
 	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// listCmd represents the list command.
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Get the status of commands",
-	Long:  `"Get the status of commands."`,
+// queueCmd lists commands that are queued for execution
+var queueCmd = &cobra.Command{
+	Use:   "queue",
+	Short: "Get the queue of commands",
+	Long:  `"Get the queue of commands."`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		recmd.InitTool()
@@ -36,15 +36,15 @@ var statusCmd = &cobra.Command{
 		ret, err := recmd.Status()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to get list %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to get the queue %v\n", err)
 		}
 
-		DisplayStatus(ret)
+		DisplayQueue(ret)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(queueCmd)
 
 	// Here you will define your flags and configuration settings.
 

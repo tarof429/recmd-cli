@@ -131,11 +131,11 @@ func List() ([]Command, error) {
 }
 
 // Status gets the list of commands that are in the queue
-func Status() ([]ScheduledCommand, error) {
+func Status() ([]Command, error) {
 	var (
-		historyData []byte             // Data representing our history file
-		cmds        []ScheduledCommand // List of commands in the queue
-		err         error              // Any errors we might encounter
+		historyData []byte    // Data representing our history file
+		cmds        []Command // List of commands in the queue
+		err         error     // Any errors we might encounter
 	)
 
 	encodedSecret := getBase64(GetSecret())
