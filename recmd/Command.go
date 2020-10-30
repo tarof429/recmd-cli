@@ -304,7 +304,7 @@ func RunCmd(value string, background bool) ScheduledCommand {
 }
 
 // AddCmd adds a command.
-func AddCmd(command string, description string) string {
+func AddCmd(command string, description string, workingDirectory string) string {
 
 	var (
 		data   []byte // Data representing status
@@ -315,8 +315,9 @@ func AddCmd(command string, description string) string {
 	encodedSecret := getBase64(GetSecret())
 	encodedCommand := getBase64(command)
 	encodedDescription := getBase64(description)
+	encodedWorkingDirectory := getBase64(workingDirectory)
 
-	url := "http://localhost:8999/secret/" + encodedSecret + "/add/command/" + encodedCommand + "/description/" + encodedDescription
+	url := "http://localhost:8999/secret/" + encodedSecret + "/add/command/" + encodedCommand + "/description/" + encodedDescription + "/workingDirectory/" + encodedWorkingDirectory
 
 	resp, err := http.Get(url)
 

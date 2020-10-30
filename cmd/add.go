@@ -26,8 +26,9 @@ import (
 )
 
 var (
-	command     string // The command to run
-	description string // Description of the command
+	command          string // The command to run
+	description      string // Description of the command
+	workingDirectory string // Location to start the command
 )
 
 // addCmd represents the add command. It takes two parameter, the command string, and the description.
@@ -45,9 +46,13 @@ var addCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if workingDirectory == "" {
+			workingDirectory = "."
+		}
+
 		recmd.InitTool()
 
-		ret := recmd.AddCmd(command, description)
+		ret := recmd.AddCmd(command, description, workingDirectory)
 
 		status, _ := strconv.ParseBool(ret)
 
@@ -65,7 +70,7 @@ func init() {
 
 	addCmd.Flags().StringVarP(&command, "command", "c", "", "Command line")
 	addCmd.Flags().StringVarP(&description, "description", "d", "", "Description")
-	// addCmd.AddCommand(&comment, "message", "m", 1, "Message about the command")
+	addCmd.Flags().StringVarP(&workingDirectory, "workingDirectory", "w", "", "Location to start the command")
 
 	// Here you will define your flags and configuration settings.
 
