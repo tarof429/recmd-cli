@@ -1,4 +1,4 @@
-package recmd
+package cli
 
 import (
 	"fmt"

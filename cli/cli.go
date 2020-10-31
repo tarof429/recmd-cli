@@ -1,18 +1,16 @@
-// Common functions
+package cli
 
-package cmd
+// Common functions
 
 import (
 	"fmt"
 	"os"
 	"strconv"
 	"text/tabwriter"
-
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 // DisplayQueue lists the queue of commands in a table format
-func DisplayQueue(ret []recmd.Command) {
+func DisplayQueue(ret []Command) {
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 4, ' ', 0)
 
 	defer w.Flush()
@@ -48,7 +46,7 @@ func DisplayQueue(ret []recmd.Command) {
 }
 
 // Display lists the given list of commands in a table format
-func Display(ret []recmd.Command) {
+func Display(ret []Command) {
 	w := tabwriter.NewWriter(os.Stdout, 2, 2, 4, ' ', 0)
 
 	defer w.Flush()

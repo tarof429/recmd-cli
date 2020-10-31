@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
@@ -22,58 +22,47 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-var (
-	// backgroundFlag is a flag that determines whether to run a command in the background
-	backgroundFlag bool
-)
-
-// The runCmd represents the run command. It takes one parameter, the command hash.
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run a command",
-	Long:  `Run a command`,
+// deleteCmd represents the delete command. It takes one parameter, the command hash.
+var deleteCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete a command",
+	Long:  `Delete a command`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Error: the hash must be specified")
+			fmt.Println("Error: the command must be specified")
 			os.Exit(1)
 		}
 
-		recmd.InitTool()
+		InitTool()
 
 		commandHash := strings.Trim(args[0], "")
 
-		// backgroundFlag is a flag that determines whether to run a command in the background
-		ret := recmd.RunCmd(commandHash, backgroundFlag)
+		cmds, err := DeleteCmd(commandHash)
 
-		// backgroundFlag is a flag that determines whether to run a command in the background
-		if backgroundFlag == false {
-			if ret.CmdHash == "" {
-				fmt.Fprintf(os.Stderr, "Error: hash not found\n")
-				os.Exit(1)
-			}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to delete command %v\n", err)
+		}
 
-			fmt.Println(ret.Coutput)
+		if len(cmds) == 0 {
+			fmt.Fprintf(os.Stderr, "Unable to find command in history\n")
 		}
 
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
-
-	runCmd.Flags().BoolVarP(&backgroundFlag, "b", "b", false, "Run command in the background")
+	rootCmd.AddCommand(deleteCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

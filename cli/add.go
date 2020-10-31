@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
@@ -22,7 +22,6 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 var (
@@ -50,9 +49,9 @@ var addCmd = &cobra.Command{
 			workingDirectory = "."
 		}
 
-		recmd.InitTool()
+		InitTool()
 
-		ret := recmd.AddCmd(command, description, workingDirectory)
+		ret := AddCmd(command, description, workingDirectory)
 
 		status, _ := strconv.ParseBool(ret)
 

@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
@@ -21,30 +21,29 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// listCmd represents the list command.
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List commands",
-	Long:  `List commands.`,
+// queueCmd lists commands that are queued for execution
+var queueCmd = &cobra.Command{
+	Use:   "queue",
+	Short: "Get the queue of commands",
+	Long:  `"Get the queue of commands."`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		recmd.InitTool()
+		InitTool()
 
-		ret, err := recmd.List()
+		ret, err := Status()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to get list %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to get the queue %v\n", err)
 		}
 
-		Display(ret)
+		DisplayQueue(ret)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(queueCmd)
 
 	// Here you will define your flags and configuration settings.
 

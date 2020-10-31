@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
 // searchCmd represents the search command. It takes one parameter, the command description.
@@ -40,11 +39,11 @@ var searchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		recmd.InitTool()
+		InitTool()
 
 		description := strings.Trim(args[0], "")
 
-		ret, err := recmd.SearchCmd(description)
+		ret, err := SearchCmd(description)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)

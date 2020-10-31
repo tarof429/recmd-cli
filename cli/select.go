@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 /*
 Copyright © 2020 Taro Fukunaga <tarof429@gmail.com>
@@ -17,53 +17,52 @@ limitations under the License.
 */
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
-	recmd "github.com/tarof429/recmd-cli/recmd"
 )
 
-// deleteCmd represents the delete command. It takes one parameter, the command hash.
-var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete a command",
-	Long:  `Delete a command`,
+// selectCmd represents the select command. It takes one parameter, the command hash.
+var selectCmd = &cobra.Command{
+	Use:   "select",
+	Short: "Select a command by is hash",
+	Long:  `Select a command by its hash`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Error: the command must be specified")
+			fmt.Println("Error: the command hash must be specified")
 			os.Exit(1)
 		}
 
-		recmd.InitTool()
+		InitTool()
 
 		commandHash := strings.Trim(args[0], "")
 
-		cmds, err := recmd.DeleteCmd(commandHash)
+		ret, err := SelectCmd(commandHash)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to delete command %v\n", err)
+			fmt.Fprintf(os.Stderr, "Unable to select command %v\n", err)
 		}
 
-		if len(cmds) == 0 {
-			fmt.Fprintf(os.Stderr, "Unable to find command in history\n")
-		}
+		data, _ := json.MarshalIndent(ret, "", "\t")
+		fmt.Println(string(data))
 
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(selectCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// searchCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// searchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

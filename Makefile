@@ -5,7 +5,7 @@ build:
 default: build
 
 test:
-	(cd recmd; go test)
+	(go test github.com/tarof429/recmd-cli/cli)
 
 clean:
 	rm -f recmd-cli

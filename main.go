@@ -15,8 +15,8 @@ limitations under the License.
 */
 package main
 
-import "github.com/tarof429/recmd-cli/cmd"
+import "github.com/tarof429/recmd-cli/cli"
 
 func main() {
-	cmd.Execute()
+	cli.Execute()
 }
