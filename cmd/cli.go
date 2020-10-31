@@ -17,11 +17,11 @@ func DisplayQueue(ret []recmd.Command) {
 
 	defer w.Flush()
 
-	show := func(a, b, c interface{}) {
-		fmt.Fprintf(w, "%v\t%v\t%v\n", a, b, c)
+	show := func(a, b, c, d interface{}) {
+		fmt.Fprintf(w, "%v\t%v\t%v\t%v\n", a, b, c, d)
 	}
 
-	show("HASH", "COMMAND", "DESCRIPTION")
+	show("HASH", "COMMAND", "DESCRIPTION", "STATUS")
 
 	for _, c := range ret {
 		cmdHash := c.CmdHash[0:15]
@@ -41,7 +41,9 @@ func DisplayQueue(ret []recmd.Command) {
 			Description = c.Description
 		}
 
-		show(cmdHash, cmdString, Description)
+		Status := c.Status
+
+		show(cmdHash, cmdString, Description, Status)
 	}
 }
 

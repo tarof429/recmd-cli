@@ -13,24 +13,30 @@ import (
 	"github.com/theckman/yacspin"
 )
 
+type CommandStatus string
+
+const (
+	Idle      CommandStatus = "Idle"
+	Running   CommandStatus = "Running"
+	Completed CommandStatus = "Completed"
+)
+
 // Command represents a command and optionally a description to document what the command does
 type Command struct {
 	CmdHash     string        `json:"commandHash"`
 	CmdString   string        `json:"commandString"`
 	Description string        `json:"description"`
 	Duration    time.Duration `json:"duration"`
+	Status      CommandStatus `json:"status"`
 }
-
-type ScheduledStatus string
 
 // ScheduledCommand represents a command that is scheduled to run
 type ScheduledCommand struct {
 	Command
-	Coutput    string          `json:"coutput"`
-	ExitStatus int             `json:"exitStatus"`
-	StartTime  time.Time       `json:"startTime"`
-	EndTime    time.Time       `json:"endTime"`
-	Status     ScheduledStatus `json:"status"`
+	Coutput    string    `json:"coutput"`
+	ExitStatus int       `json:"exitStatus"`
+	StartTime  time.Time `json:"startTime"`
+	EndTime    time.Time `json:"endTime"`
 }
 
 const historyFile = ".cmd_history.json"
