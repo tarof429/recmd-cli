@@ -1,3 +1,6 @@
 testdata
 recmd/testdata
 recmd-cli
+*.log
+*.pid
+recmd-dmn

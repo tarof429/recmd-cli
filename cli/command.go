@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/theckman/yacspin"
@@ -19,6 +21,9 @@ const (
 	Idle      CommandStatus = "Idle"
 	Running   CommandStatus = "Running"
 	Completed CommandStatus = "Completed"
+
+	recmdDmn string = "recmd-dmn" // name of the command we want to run
+	recmdPid string = "recmd-dmn.pid"
 )
 
 // Command represents a command and optionally a description to document what the command does
@@ -338,4 +343,108 @@ func AddCmd(command string, description string, workingDirectory string) string 
 	json.Unmarshal(data, &status)
 
 	return status
+}
+
+// StartCmd starts the daemon. In order for this to work, the daemon
+// must be colocated with the CLI. For some reason, if recmd-dmn is started twice,
+// it cannot serve requests. So there is logic in this code to 1) check if a PID
+// file exists in the current directory 2) If it exists, kill the process, delete the
+// PID file 3) Start recmd-dmn
+func StartCmd() error {
+
+	log.Printf("Starting recmd\n")
+
+	dir, err := os.Getwd()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	pidFilePath := filepath.Join(dir, recmdPid)
+
+	cmd := exec.Command(recmdDmn)
+	cmd.Dir = dir
+	err = cmd.Start()
+	pid := cmd.Process.Pid
+	mode := int(0644)
+	data := []byte(strconv.Itoa(pid))
+	ioutil.WriteFile(pidFilePath, data, os.FileMode(mode))
+
+	// Check if the process is available
+	i := 0
+	for i < 3 {
+		time.Sleep(time.Second)
+		_, err = List()
+
+		if err == nil {
+			break
+		}
+		i = i + 1
+	}
+
+	return err
+}
+
+// StopCmd stops the daemon by finding the process indicated by the PID file
+func StopCmd() error {
+
+	log.Println("Stopping command")
+
+	dir, err := os.Getwd()
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	pidFilePath := filepath.Join(dir, recmdPid)
+
+	if _, err := os.Stat(pidFilePath); err != nil {
+
+		log.Fatalln("Unable to find PID file.")
+		return err
+	}
+
+	currentPid, err := ioutil.ReadFile(pidFilePath)
+
+	if err != nil {
+		log.Fatalln("Found a PID file but unable to read contents")
+	}
+
+	currentPidAsInt, _ := strconv.Atoi(string(currentPid))
+
+	log.Printf("Found PID: %v\n", currentPidAsInt)
+
+	p, err := os.FindProcess(currentPidAsInt)
+
+	if err == nil {
+		log.Println("Stopping process")
+		err = p.Signal(os.Interrupt)
+		p.Wait()
+		return err
+	}
+
+	return nil
+}
+
+// StopThenStartCmd stops the dameon before starting it. The intention
+// is to provide a safe way to start the dameon.
+func StopThenStartCmd() error {
+
+	func() error {
+		err := StopCmd()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	func() error {
+
+		err := StartCmd()
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
+	return nil
 }
