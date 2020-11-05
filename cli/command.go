@@ -399,9 +399,7 @@ func StopCmd() error {
 	pidFilePath := filepath.Join(dir, recmdPid)
 
 	if _, err := os.Stat(pidFilePath); err != nil {
-
-		log.Fatalln("Unable to find PID file.")
-		return err
+		return nil
 	}
 
 	currentPid, err := ioutil.ReadFile(pidFilePath)
@@ -419,8 +417,11 @@ func StopCmd() error {
 	if err == nil {
 		log.Println("Stopping process")
 		err = p.Signal(os.Interrupt)
-		p.Wait()
-		return err
+		_, err := p.Wait()
+		time.Sleep(time.Second)
+		if err != nil {
+			log.Println("Stopped")
+		}
 	}
 
 	return nil
