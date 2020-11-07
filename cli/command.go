@@ -47,7 +47,7 @@ type ScheduledCommand struct {
 const historyFile = ".cmd_history.json"
 
 const (
-	// D(rectory containing configuration and command history
+	// Directory containing configuration and command history
 	recmdDir = ".recmd"
 
 	// The secret file
@@ -69,27 +69,13 @@ var (
 // InitTool initializes the tool
 func InitTool() {
 
-	// Create ~/.recmd if it doesn't exist
-	homeDir, err := os.UserHomeDir()
+	wd, _ := os.Getwd()
 
-	if err != nil {
-		log.Fatalf("Error, unable to obtain home directory path %v\n", err)
-	}
+	//parentDir := filepath.Dir(wd)
 
-	recmdDirPath := filepath.Join(homeDir, recmdDir)
+	confDirPath := filepath.Join(wd, "conf")
 
-	fileInfo, statErr := os.Stat(recmdDirPath)
-
-	if os.IsNotExist((statErr)) {
-		if err != nil {
-			log.Fatalf("Error, please start recmd-dmn first: %v\n", err)
-		}
-	} else if !fileInfo.IsDir() {
-		log.Fatalf("Error, ~/.recmd is not a directory")
-	}
-
-	recmdSecretFilePath = filepath.Join(recmdDirPath, recmdSecretFile)
-
+	recmdSecretFilePath = filepath.Join(confDirPath, recmdSecretFile)
 }
 
 // GetSecret gets the secret from the file system
@@ -352,7 +338,7 @@ func AddCmd(command string, description string, workingDirectory string) string 
 // PID file 3) Start recmd-dmn
 func StartCmd() error {
 
-	log.Printf("Starting recmd\n")
+	log.Println("Starting command")
 
 	dir, err := os.Getwd()
 
@@ -360,11 +346,15 @@ func StartCmd() error {
 		log.Fatalln(err)
 	}
 
+	// binDir := filepath.Join(dir, "bin")
+	//log.Printf("command.go: Starting recmd in %v\n", dir)
+
 	pidFilePath := filepath.Join(dir, recmdPid)
 
-	cmd := exec.Command(recmdDmn)
+	cmd := exec.Command("bin/" + recmdDmn)
 	cmd.Dir = dir
 	err = cmd.Start()
+	//fmt.Println(cmd.Process.Pid)
 	pid := cmd.Process.Pid
 	mode := int(0644)
 	data := []byte(strconv.Itoa(pid))
