@@ -127,8 +127,8 @@ func List() ([]Command, error) {
 
 }
 
-// Status gets the list of commands that are in the queue
-func Status() ([]Command, error) {
+// Queue gets the list of commands that are in the queue
+func Queue() ([]Command, error) {
 	var (
 		historyData []byte    // Data representing our history file
 		cmds        []Command // List of commands in the queue
@@ -137,7 +137,7 @@ func Status() ([]Command, error) {
 
 	encodedSecret := getBase64(GetSecret())
 
-	url := "http://localhost:8999/secret/" + encodedSecret + "/status"
+	url := "http://localhost:8999/secret/" + encodedSecret + "/queue"
 
 	resp, err := http.Get(url)
 

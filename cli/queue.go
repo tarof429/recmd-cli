@@ -32,7 +32,7 @@ var queueCmd = &cobra.Command{
 
 		InitTool()
 
-		ret, err := Status()
+		ret, err := Queue()
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to get the queue %v\n", err)
