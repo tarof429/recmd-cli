@@ -243,6 +243,34 @@ func DeleteCmd(value string) ([]Command, error) {
 	return cmds, err
 }
 
+// StatusCmd gets the status of the daemon.
+func StatusCmd() (bool, error) {
+
+	var (
+		statusData []byte // Data representing our history file
+		status     bool   // List of commands produced after unmarshalling historyData
+		err        error  // Any errors we might encounter
+	)
+
+	encodedSecret := getBase64(GetSecret())
+
+	url := "http://localhost:8999/secret/" + encodedSecret + "/status"
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return false, err
+	}
+
+	defer resp.Body.Close()
+
+	statusData, _ = ioutil.ReadAll(resp.Body)
+
+	err = json.Unmarshal(statusData, &status)
+
+	return status, err
+}
+
 // RunCmd run s a command
 func RunCmd(value string, background bool) ScheduledCommand {
 
