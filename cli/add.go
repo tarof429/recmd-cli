@@ -51,7 +51,11 @@ var addCmd = &cobra.Command{
 
 		InitTool()
 
-		ret := AddCmd(command, description, workingDirectory)
+		ret, err := AddCmd(command, description, workingDirectory)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+		}
 
 		status, _ := strconv.ParseBool(ret)
 

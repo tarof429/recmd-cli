@@ -46,11 +46,14 @@ var searchCmd = &cobra.Command{
 		ret, err := SearchCmd(description)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to find command %v\n", err)
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+			return
 		}
 
-		data, _ := json.MarshalIndent(ret, "", "\t")
-		fmt.Println(string(data))
+		if len(ret) > 0 {
+			data, _ := json.MarshalIndent(ret, "", "\t")
+			fmt.Println(string(data))
+		}
 	},
 }
 

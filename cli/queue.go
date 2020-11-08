@@ -35,7 +35,8 @@ var queueCmd = &cobra.Command{
 		ret, err := Queue()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to get the queue %v\n", err)
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+			return
 		}
 
 		DisplayQueue(ret)

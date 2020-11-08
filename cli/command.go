@@ -76,6 +76,17 @@ func InitTool() {
 	confDirPath := filepath.Join(wd, "conf")
 
 	recmdSecretFilePath = filepath.Join(confDirPath, recmdSecretFile)
+
+	if _, err := os.Stat(recmdSecretFilePath); err != nil {
+		ioutil.WriteFile(recmdSecretFilePath, GenerateDummySecret(), os.FileMode(0644))
+	}
+
+}
+
+func GenerateDummySecret() []byte {
+	ret := make([]byte, 40)
+
+	return ret
 }
 
 // GetSecret gets the secret from the file system
@@ -114,7 +125,7 @@ func List() ([]Command, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return cmds, err
 	}
 
 	defer resp.Body.Close()
@@ -142,7 +153,7 @@ func Queue() ([]Command, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return cmds, err
 	}
 
 	defer resp.Body.Close()
@@ -172,7 +183,7 @@ func SelectCmd(value string) (Command, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return cmd, err
 	}
 
 	defer resp.Body.Close()
@@ -201,7 +212,7 @@ func SearchCmd(value string) ([]Command, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return cmds, err
 	}
 
 	defer resp.Body.Close()
@@ -231,7 +242,7 @@ func DeleteCmd(value string) ([]Command, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return cmds, err
 	}
 
 	defer resp.Body.Close()
@@ -272,7 +283,7 @@ func StatusCmd() (bool, error) {
 }
 
 // RunCmd run s a command
-func RunCmd(value string, background bool) ScheduledCommand {
+func RunCmd(value string, background bool) (ScheduledCommand, error) {
 
 	var (
 		historyData []byte           // Data representing our history file
@@ -306,7 +317,7 @@ func RunCmd(value string, background bool) ScheduledCommand {
 
 		spinner.Stop()
 
-		return cmd
+		return cmd, nil
 	}
 
 	spinner.Start()
@@ -314,7 +325,7 @@ func RunCmd(value string, background bool) ScheduledCommand {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return cmd, err
 	}
 
 	defer resp.Body.Close()
@@ -325,11 +336,11 @@ func RunCmd(value string, background bool) ScheduledCommand {
 
 	spinner.Stop()
 
-	return cmd
+	return cmd, nil
 }
 
 // AddCmd adds a command.
-func AddCmd(command string, description string, workingDirectory string) string {
+func AddCmd(command string, description string, workingDirectory string) (string, error) {
 
 	var (
 		data   []byte // Data representing status
@@ -347,7 +358,7 @@ func AddCmd(command string, description string, workingDirectory string) string 
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalln(err)
+		return status, err
 	}
 
 	defer resp.Body.Close()
@@ -356,7 +367,7 @@ func AddCmd(command string, description string, workingDirectory string) string 
 
 	json.Unmarshal(data, &status)
 
-	return status
+	return status, nil
 }
 
 // StartCmd starts the daemon. In order for this to work, the daemon
@@ -423,23 +434,24 @@ func StopCmd() error {
 	currentPid, err := ioutil.ReadFile(pidFilePath)
 
 	if err != nil {
-		log.Fatalln("Found a PID file but unable to read contents")
+		log.Println("Found a PID file but unable to read contents")
 	}
 
 	currentPidAsInt, _ := strconv.Atoi(string(currentPid))
 
-	log.Printf("Found PID: %v\n", currentPidAsInt)
+	//log.Printf("Found PID: %v\n", currentPidAsInt)
 
 	p, err := os.FindProcess(currentPidAsInt)
 
 	if err == nil {
-		log.Println("Stopping process")
+		//log.Println("Stopping process")
 		err = p.Signal(os.Interrupt)
-		_, err := p.Wait()
+		p.Wait()
+		// _, err := p.Wait()
 		time.Sleep(time.Second)
-		if err != nil {
-			log.Println("Stopped")
-		}
+		// if err != nil {
+		// 	log.Println("Stopped")
+		// }
 	}
 
 	return nil

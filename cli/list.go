@@ -35,7 +35,8 @@ var listCmd = &cobra.Command{
 		ret, err := List()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to get list %v\n", err)
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+			return
 		}
 
 		Display(ret)

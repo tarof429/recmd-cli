@@ -16,3 +16,9 @@ func TestMain(m *testing.M) {
 
 	os.Exit(status)
 }
+
+func TestGenerateDummySecret(t *testing.T) {
+
+	secret := GenerateDummySecret()
+	fmt.Println(secret)
+}

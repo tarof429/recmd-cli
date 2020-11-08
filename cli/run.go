@@ -46,7 +46,12 @@ var runCmd = &cobra.Command{
 		commandHash := strings.Trim(args[0], "")
 
 		// backgroundFlag is a flag that determines whether to run a command in the background
-		ret := RunCmd(commandHash, backgroundFlag)
+		ret, err := RunCmd(commandHash, backgroundFlag)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+			return
+		}
 
 		// backgroundFlag is a flag that determines whether to run a command in the background
 		if backgroundFlag == false {

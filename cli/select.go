@@ -44,7 +44,8 @@ var selectCmd = &cobra.Command{
 		ret, err := SelectCmd(commandHash)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to select command %v\n", err)
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+			return
 		}
 
 		data, _ := json.MarshalIndent(ret, "", "\t")

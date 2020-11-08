@@ -32,7 +32,7 @@ var deleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
-			fmt.Println("Error: the command must be specified")
+			fmt.Println("Error: the command hash must be specified")
 			os.Exit(1)
 		}
 
@@ -43,7 +43,8 @@ var deleteCmd = &cobra.Command{
 		cmds, err := DeleteCmd(commandHash)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to delete command %v\n", err)
+			fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+			return
 		}
 
 		if len(cmds) == 0 {
