@@ -55,11 +55,6 @@ var runCmd = &cobra.Command{
 
 		// backgroundFlag is a flag that determines whether to run a command in the background
 		if backgroundFlag == false {
-			if ret.CmdHash == "" {
-				fmt.Fprintf(os.Stderr, "Error: hash not found\n")
-				os.Exit(1)
-			}
-
 			fmt.Println(ret.Coutput)
 		}
 

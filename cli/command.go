@@ -324,6 +324,8 @@ func RunCmd(value string, background bool) (ScheduledCommand, error) {
 
 	resp, err := http.Get(url)
 
+	//log.Println(resp)
+
 	if err != nil {
 		return cmd, err
 	}
