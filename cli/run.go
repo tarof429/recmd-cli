@@ -27,6 +27,9 @@ import (
 var (
 	// backgroundFlag is a flag that determines whether to run a command in the background
 	backgroundFlag bool
+
+	// interactiveFlag is a flag that lets you run commands interactively
+	interactiveFlag bool
 )
 
 // The runCmd represents the run command. It takes one parameter, the command hash.
@@ -41,11 +44,37 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if backgroundFlag == true && interactiveFlag == true {
+			fmt.Println("Commands can be run in either normal, background or interactive mode.")
+			os.Exit(1)
+		}
+
 		InitTool()
 
 		commandHash := strings.Trim(args[0], "")
 
+		if interactiveFlag == true {
+			ret, err := ShowCmd(commandHash)
+
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
+				return
+			}
+			fmt.Println(ret)
+
+			fmt.Print("Do you want to continue? (y/N) ")
+
+			var resp string
+			fmt.Scanln(&resp)
+			fmt.Print(resp)
+
+			if strings.Trim(resp, "") != "y" {
+				return
+			}
+		}
+
 		// backgroundFlag is a flag that determines whether to run a command in the background
+		// if this is not set, then the command will run in the foreground.
 		ret, err := RunCmd(commandHash, backgroundFlag)
 
 		if err != nil {
@@ -65,6 +94,7 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().BoolVarP(&backgroundFlag, "b", "b", false, "Run command in the background")
+	runCmd.Flags().BoolVarP(&interactiveFlag, "i", "i", false, "Run command in the background")
 
 	// Here you will define your flags and configuration settings.
 
