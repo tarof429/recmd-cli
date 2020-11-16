@@ -56,9 +56,9 @@ var walkCmd = &cobra.Command{
 
 			fmt.Print("Do you want to run this command? (y/N) ")
 
-			var resp string
+			// Reset the response
+			resp = ""
 			fmt.Scanln(&resp)
-			fmt.Print(resp)
 
 			if strings.Trim(resp, "") != "y" {
 				continue
