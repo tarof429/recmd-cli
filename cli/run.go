@@ -44,6 +44,11 @@ var runCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if backgroundFlag == true && interactiveFlag == true {
+			fmt.Println("Commands can be run in either normal, background or interactive mode.")
+			os.Exit(1)
+		}
+
 		InitTool()
 
 		commandHash := strings.Trim(args[0], "")
@@ -69,6 +74,7 @@ var runCmd = &cobra.Command{
 		}
 
 		// backgroundFlag is a flag that determines whether to run a command in the background
+		// if this is not set, then the command will run in the foreground.
 		ret, err := RunCmd(commandHash, backgroundFlag)
 
 		if err != nil {
