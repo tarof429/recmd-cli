@@ -195,6 +195,35 @@ func SelectCmd(value string) (Command, error) {
 	return cmd, err
 }
 
+// ShowCmd returns the actual command that will be run
+func ShowCmd(value string) (string, error) {
+
+	var (
+		historyData []byte // Data representing our history file
+		cmd         string // List of commands produced after unmarshalling historyData
+		err         error  // Any errors we might encounter
+	)
+
+	encodedSecret := getBase64(GetSecret())
+	encodedCommandHash := getBase64(value)
+
+	url := "http://localhost:8999/secret/" + encodedSecret + "/show/cmdHash/" + encodedCommandHash
+
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return cmd, err
+	}
+
+	defer resp.Body.Close()
+
+	historyData, _ = ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(historyData, &cmd)
+
+	return cmd, err
+}
+
 // SearchCmd returns a command by name
 func SearchCmd(value string) ([]Command, error) {
 
