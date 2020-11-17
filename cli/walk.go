@@ -36,12 +36,12 @@ var walkCmd = &cobra.Command{
 			return
 		}
 
-		total := len(ret) - 1
+		total := len(ret)
 
 		for index, cmd := range ret {
 
 			fmt.Println("*****************************")
-			fmt.Printf("Walking through command %x/%x\n", index+1, total+1)
+			fmt.Printf("Walking through command %x/%x\n", index+1, total)
 			fmt.Println("*****************************")
 			fmt.Println()
 
@@ -72,6 +72,10 @@ var walkCmd = &cobra.Command{
 
 			fmt.Println(sc.Coutput)
 
+			// Wait for the user to hit 'enter' before showing the next command
+			fmt.Print("Type any key to continue ")
+			resp = ""
+			fmt.Scanln(&resp)
 		}
 	},
 }
