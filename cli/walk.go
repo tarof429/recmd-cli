@@ -3,8 +3,9 @@ package cli
 import (
 	"fmt"
 	"os"
-	"strings"
+	"time"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
@@ -18,12 +19,14 @@ var walkCmd = &cobra.Command{
 		fmt.Println("This operation will walk through all the commands.")
 		fmt.Println("The command will only be run if you answer 'y'.")
 
-		fmt.Print("Do you want to continue? (y/N) ")
+		prompt := promptui.Prompt{
+			Label:     "Do you want to continue?",
+			IsConfirm: true,
+		}
 
-		var resp string
-		fmt.Scanln(&resp)
+		_, err := prompt.Run()
 
-		if strings.Trim(resp, "") != "y" {
+		if err != nil {
 			return
 		}
 
@@ -54,15 +57,20 @@ var walkCmd = &cobra.Command{
 			fmt.Println(ret)
 			fmt.Println()
 
-			fmt.Print("Do you want to run this command? (y/N) ")
+			// Ask the user whether to run the command.
+			// If the user types 'y', then run the comand. If the user types 'N', then
+			// move on to the next command. If the user inputs anything else (such as Ctrl-C) then abort.
+			prompt := promptui.Prompt{
+				Label:     "Do you want to run this command",
+				IsConfirm: true,
+			}
 
-			// Reset the response
-			resp = ""
-			fmt.Scanln(&resp)
+			ret, err = prompt.Run()
 
-			if strings.Trim(resp, "") != "y" {
+			if ret != "y" {
 				continue
 			}
+
 			sc, err := RunCmd(cmd.CmdHash, false)
 
 			if err != nil {
@@ -71,12 +79,24 @@ var walkCmd = &cobra.Command{
 			}
 
 			fmt.Println(sc.Coutput)
+			time.Sleep(time.Second)
 
-			// Wait for the user to hit 'enter' before showing the next command
-			fmt.Print("Type any key to continue ")
-			resp = ""
-			fmt.Scanln(&resp)
+			// // Similar to the above prompt. If the user types Ctrl-C, then abort. Otherwise, continue to the next command.
+			// prompt = promptui.Prompt{
+			// 	Label:     "Type any key to continue",
+			// 	IsConfirm: false,
+			// }
+
+			// ret, err = prompt.Run()
+
+			// if ret == "" {
+			// 	continue
+			// } else if err != nil {
+			// 	return
+			// }
+
 		}
+
 	},
 }
 
