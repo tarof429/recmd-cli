@@ -3,9 +3,11 @@ package cli
 import (
 	"fmt"
 	"os"
-	"time"
+	"strconv"
 
 	"github.com/manifoldco/promptui"
+	"github.com/pterm/pterm"
+
 	"github.com/spf13/cobra"
 )
 
@@ -16,19 +18,19 @@ var walkCmd = &cobra.Command{
 	Long:  `"Walk through the commands.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Println("This operation will walk through all the commands.")
-		fmt.Println("The command will only be run if you answer 'y'.")
+		// fmt.Printf("\nThis operation will walk through all the commands.")
+		// fmt.Printf("\nThe command will only be run if you answer 'y'.\n")
 
-		prompt := promptui.Prompt{
-			Label:     "Do you want to continue?",
-			IsConfirm: true,
-		}
+		// prompt := promptui.Prompt{
+		// 	Label:     "Continue",
+		// 	IsConfirm: true,
+		// }
 
-		_, err := prompt.Run()
+		// _, err := prompt.Run()
 
-		if err != nil {
-			return
-		}
+		// if err != nil {
+		// 	return
+		// }
 
 		InitTool()
 
@@ -43,10 +45,10 @@ var walkCmd = &cobra.Command{
 
 		for index, cmd := range ret {
 
-			fmt.Println("*****************************")
-			fmt.Printf("Walking through command %x/%x\n", index+1, total)
-			fmt.Println("*****************************")
-			fmt.Println()
+			pterm.Bold.Printf(pterm.LightBlue("Command "))
+			header := "Command " + strconv.Itoa(index+1) + "/" + strconv.Itoa(total)
+
+			pterm.Bold.Printf(pterm.LightBlue(header) + "\n\n")
 
 			ret, err := ShowCmd(cmd.CmdHash)
 
@@ -54,8 +56,20 @@ var walkCmd = &cobra.Command{
 				fmt.Fprintf(os.Stderr, "Command failed: please run './recmd start' and try again.\n")
 				return
 			}
-			fmt.Println(ret)
-			fmt.Println()
+
+			var CustomTable = pterm.TablePrinter{
+				HeaderStyle:    &pterm.Style{pterm.FgLightBlue, pterm.Bold},
+				Style:          &pterm.Style{pterm.FgWhite},
+				Separator:      " | ",
+				SeparatorStyle: &pterm.ThemeDefault.TableSeparatorStyle,
+			}
+
+			CustomTable.WithHasHeader().WithData(pterm.TableData{
+				{"Field", "Value"},
+				{"Hash", cmd.CmdHash},
+				{"Description", cmd.Description},
+				{"Command", cmd.CmdString},
+			}).Render()
 
 			// Ask the user whether to run the command.
 			// If the user types 'y', then run the comand. If the user types 'N', then
@@ -78,22 +92,8 @@ var walkCmd = &cobra.Command{
 				return
 			}
 
-			fmt.Println(sc.Coutput)
-			time.Sleep(time.Second)
-
-			// // Similar to the above prompt. If the user types Ctrl-C, then abort. Otherwise, continue to the next command.
-			// prompt = promptui.Prompt{
-			// 	Label:     "Type any key to continue",
-			// 	IsConfirm: false,
-			// }
-
-			// ret, err = prompt.Run()
-
-			// if ret == "" {
-			// 	continue
-			// } else if err != nil {
-			// 	return
-			// }
+			pterm.Println()
+			pterm.FgLightYellow.Println(sc.Coutput)
 
 		}
 
